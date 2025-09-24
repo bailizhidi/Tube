@@ -724,8 +724,10 @@ void MainWindow::import_part()
 
 //----------提取外表面----------
 #include <vtkRendererCollection.h>
-#include <unordered_set> // 添加这一行来包含 std::unordered_set
+#include <unordered_set>
+#include <BRepAdaptor_Surface.hxx>
 
+//鼠标点击事件响应函数
 void MainWindow::OnLeftButtonDown(vtkObject* obj, unsigned long eid, void* clientdata, void* calldata)
 {
     MainWindow* self = static_cast<MainWindow*>(clientdata);
@@ -751,26 +753,34 @@ void MainWindow::OnLeftButtonDown(vtkObject* obj, unsigned long eid, void* clien
     }
 }
 
+//BFS 算法提取相连的圆柱/环面/B样条面，组成外壳
 TopoDS_Shape MainWindow::FindConnectedOuterSurface(const TopoDS_Shape& shape, const TopoDS_Face& seedFace)
 {
+    // ✅ 1. 判断种子面是否是圆柱面、环面或 B-Spline 面
+    BRepAdaptor_Surface surf(seedFace);
+    GeomAbs_SurfaceType type = surf.GetType();
+
+    // ✅ 支持三种类型：圆柱、环面、B样条（自由曲面）
+    if (type != GeomAbs_Cylinder && type != GeomAbs_Torus && type != GeomAbs_BSplineSurface) {
+        qDebug() << "【警告】点击的面不是圆柱/环面/B样条面，无法提取外壁";
+        qDebug() << "         面类型代码：" << type; // 打印类型编号，便于调试
+        return TopoDS_Shape(); // 返回空
+    }
+
+    qDebug() << "【调试】种子面类型：" << type;
+
+    // ✅ 2. 初始化 BFS
     BRep_Builder builder;
     TopoDS_Compound result;
     builder.MakeCompound(result);
 
-    // 1. 获取种子面的中心点和法线
-    gp_Pnt seedCenter;
-    gp_Vec seedNormal;
-    GetFaceCenterAndNormal(seedFace, seedCenter, seedNormal);
-    qDebug() << "【调试】种子面中心点: (" << seedCenter.X() << ", " << seedCenter.Y() << ", " << seedCenter.Z() << ")";
-    qDebug() << "【调试】种子面法线: (" << seedNormal.X() << ", " << seedNormal.Y() << ", " << seedNormal.Z() << ")";
-
     std::unordered_set<TopoDS_Shape, ShapeHash, ShapeEqual> visited;
-    std::queue<TopoDS_Shape> toVisit;
+    std::queue<TopoDS_Face> toVisit;
     toVisit.push(seedFace);
 
     int processedCount = 0;
     while (!toVisit.empty()) {
-        TopoDS_Shape currentFace = toVisit.front();
+        TopoDS_Face currentFace = toVisit.front();
         toVisit.pop();
 
         if (visited.count(currentFace) > 0) continue;
@@ -778,46 +788,72 @@ TopoDS_Shape MainWindow::FindConnectedOuterSurface(const TopoDS_Shape& shape, co
         builder.Add(result, currentFace);
         processedCount++;
 
-        // 2. 查找相邻面
+        // ✅ 3. 查找相邻面
         TopExp_Explorer edgeExp(currentFace, TopAbs_EDGE);
         for (; edgeExp.More(); edgeExp.Next()) {
             TopoDS_Edge edge = TopoDS::Edge(edgeExp.Current());
             TopTools_ListOfShape faceList;
             GetFacesSharingEdge(shape, edge, faceList);
 
-            for (const auto& adjFace : faceList) {
-                if (visited.count(adjFace) == 0) {
-                    // 3. 判断相邻面是否在“前方”
-                    if (IsFaceInFront(TopoDS::Face(adjFace), seedCenter, seedNormal)) {
-                        toVisit.push(adjFace);
-                    }
+            for (const auto& adjFaceShape : faceList) {
+                TopoDS_Face adjFace = TopoDS::Face(adjFaceShape);
+                if (visited.count(adjFace) > 0) continue;
+
+                // ✅ 4. 判断相邻面是否是圆柱/环面/B样条
+                BRepAdaptor_Surface adjSurf(adjFace);
+                GeomAbs_SurfaceType adjType = adjSurf.GetType();
+                if (adjType != GeomAbs_Cylinder && adjType != GeomAbs_Torus && adjType != GeomAbs_BSplineSurface) {
+                    continue; // 不是这三种类型，跳过
                 }
+
+                toVisit.push(adjFace);
             }
         }
     }
 
-    qDebug() << "【扩展法】提取外表面成功，共" << processedCount << "个面";
+    qDebug() << "【提取外壁】成功提取" << processedCount << "个面";
     return result;
 }
 
+//判断两条边是否相同（几何上重合）
 bool AreEdgesSame(const TopoDS_Edge& e1, const TopoDS_Edge& e2)
 {
     if (e1.IsNull() || e2.IsNull()) return false;
 
-    Standard_Real f1, l1, f2, l2;
-    gp_Pnt p1_start = BRep_Tool::Pnt(TopExp::FirstVertex(e1, Standard_True));
-    gp_Pnt p1_end = BRep_Tool::Pnt(TopExp::LastVertex(e1, Standard_True));
-    gp_Pnt p2_start = BRep_Tool::Pnt(TopExp::FirstVertex(e2, Standard_True));
-    gp_Pnt p2_end = BRep_Tool::Pnt(TopExp::LastVertex(e2, Standard_True));
+    // ✅ 正确声明参数变量
+    Standard_Real first1, last1;
+    Handle(Geom_Curve) curve1 = BRep_Tool::Curve(e1, first1, last1);
 
-    // 判断端点是否重合 (正向或反向)
+    Standard_Real first2, last2;
+    Handle(Geom_Curve) curve2 = BRep_Tool::Curve(e2, first2, last2);
+
+    // 检查曲线是否有效
+    if (curve1.IsNull() || curve2.IsNull()) {
+        return false;
+    }
+
+    // 检查曲线类型是否相同
+    if (curve1->DynamicType() != curve2->DynamicType()) {
+        return false;
+    }
+
+    // 可选：进一步比较曲线几何（如类型为圆、直线等）
+    // 这里可以根据需要添加更严格的比较逻辑
+
+    // 比较端点位置
+    gp_Pnt p1_start = BRep_Tool::Pnt(TopExp::FirstVertex(e1, Standard_True));
+    gp_Pnt p1_end   = BRep_Tool::Pnt(TopExp::LastVertex(e1, Standard_True));
+    gp_Pnt p2_start = BRep_Tool::Pnt(TopExp::FirstVertex(e2, Standard_True));
+    gp_Pnt p2_end   = BRep_Tool::Pnt(TopExp::LastVertex(e2, Standard_True));
+
     Standard_Real tol = Precision::Confusion();
-    bool sameOrder = (p1_start.Distance(p2_start) < tol && p1_end.Distance(p2_end) < tol);
+    bool sameOrder   = (p1_start.Distance(p2_start) < tol && p1_end.Distance(p2_end) < tol);
     bool reverseOrder = (p1_start.Distance(p2_end) < tol && p1_end.Distance(p2_start) < tol);
 
     return sameOrder || reverseOrder;
 }
 
+//查找与给定边共享的所有面。
 void MainWindow::GetFacesSharingEdge(const TopoDS_Shape& shape, const TopoDS_Edge& edge, TopTools_ListOfShape& faceList)
 {
     TopTools_MapOfShape uniqueFaces;
@@ -837,38 +873,6 @@ void MainWindow::GetFacesSharingEdge(const TopoDS_Shape& shape, const TopoDS_Edg
             }
         }
     }
-}
-
-void MainWindow::GetFaceCenterAndNormal(const TopoDS_Face& face, gp_Pnt& center, gp_Vec& normal)
-{
-    Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
-    Standard_Real u1, u2, v1, v2;
-    surf->Bounds(u1, u2, v1, v2);
-
-    Standard_Real uMid = (u1 + u2) / 2.0;
-    Standard_Real vMid = (v1 + v2) / 2.0;
-
-    gp_Pnt P;
-    gp_Vec D1U, D1V;
-    surf->D1(uMid, vMid, P, D1U, D1V);
-
-    center = P;
-    normal = D1U.Crossed(D1V);
-    normal.Normalize();
-}
-
-bool MainWindow::IsFaceInFront(const TopoDS_Face& face, const gp_Pnt& seedCenter, const gp_Vec& seedNormal)
-{
-    gp_Pnt faceCenter;
-    gp_Vec faceNormal;
-    GetFaceCenterAndNormal(face, faceCenter, faceNormal);
-
-    // 计算从种子面中心到当前面中心的向量
-    gp_Vec toFaceCenter(seedCenter, faceCenter);
-
-    // 如果这个向量与种子面法线的点积为正，说明在“前方”
-    Standard_Real dot = seedNormal.Dot(toFaceCenter);
-    return dot > Precision::Confusion(); // 大于一个很小的正数
 }
 
 void MainWindow::extractFace()

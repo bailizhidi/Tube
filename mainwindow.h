@@ -76,12 +76,15 @@ private:
     // 在MDI子窗口中显示模型的函数
     void ShowModelInMdiArea(vtkSmartPointer<vtkRenderer> renderer);
 
+
     // 读取STEP文件
     TopoDS_Shape ReadSTEPFile(const QString& fileName);
     // 读取IGES文件
     TopoDS_Shape ReadIGESFile(const QString& fileName);
     // 将OCC形状显示到ui->mdiArea（复用渲染逻辑）
     void DisplayShape(const TopoDS_Shape& shape);
+
+
     // 用OCC提取表面
     // 存储 OCC Face 和 VTK CellId 的映射
     std::map<vtkIdType, TopoDS_Face> m_faceMap;
@@ -94,23 +97,18 @@ private:
     bool AreFacesOnSameSide(const TopoDS_Face& f1, const TopoDS_Face& f2);
     gp_Vec GetFaceNormal(const TopoDS_Face& face);
     static void OnLeftButtonDown(vtkObject* caller, unsigned long eventId, void* clientData, void* callData);
-
     // 自定义哈希函数
     struct ShapeHash {
         std::size_t operator()(const TopoDS_Shape& shape) const {
             return std::hash<TopoDS_Shape*>{}(const_cast<TopoDS_Shape*>(&shape));
         }
     };
-
     // 自定义相等比较函数
     struct ShapeEqual {
         bool operator()(const TopoDS_Shape& lhs, const TopoDS_Shape& rhs) const {
             return lhs.IsSame(rhs);
         }
     };
-
     TopoDS_Shape FindConnectedOuterSurface(const TopoDS_Shape& shape, const TopoDS_Face& seedFace);
-    void GetFaceCenterAndNormal(const TopoDS_Face& face, gp_Pnt& center, gp_Vec& normal);
-    bool IsFaceInFront(const TopoDS_Face& face, const gp_Pnt& seedCenter, const gp_Vec& seedNormal);
 };
 #endif // MAINWINDOW_H

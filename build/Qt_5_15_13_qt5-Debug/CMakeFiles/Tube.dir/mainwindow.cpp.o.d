@@ -895,4 +895,34 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/vtk-9.1/vtkCallbackCommand.h \
  /usr/include/vtk-9.1/vtkRendererCollection.h \
  /usr/include/vtk-9.1/vtkRenderer.h /usr/include/c++/13/unordered_set \
- /usr/include/c++/13/bits/unordered_set.h
+ /usr/include/c++/13/bits/unordered_set.h \
+ /usr/include/opencascade/BRepAdaptor_Surface.hxx \
+ /usr/include/opencascade/Adaptor3d_Surface.hxx \
+ /usr/include/opencascade/Adaptor3d_Curve.hxx \
+ /usr/include/opencascade/gp_Lin.hxx /usr/include/opencascade/gp_Circ.hxx \
+ /usr/include/opencascade/gp_Elips.hxx \
+ /usr/include/opencascade/gp_Hypr.hxx \
+ /usr/include/opencascade/gp_Parab.hxx \
+ /usr/include/opencascade/GeomAbs_CurveType.hxx \
+ /usr/include/opencascade/GeomAbs_SurfaceType.hxx \
+ /usr/include/opencascade/gp_Cylinder.hxx \
+ /usr/include/opencascade/gp_Ax3.hxx /usr/include/opencascade/gp_Cone.hxx \
+ /usr/include/opencascade/gp_Pln.hxx \
+ /usr/include/opencascade/gp_Sphere.hxx \
+ /usr/include/opencascade/gp_Torus.hxx \
+ /usr/include/opencascade/GeomAdaptor_Surface.hxx \
+ /usr/include/opencascade/BSplSLib_Cache.hxx \
+ /usr/include/opencascade/TColgp_Array2OfPnt.hxx \
+ /usr/include/opencascade/TColStd_HArray2OfReal.hxx \
+ /usr/include/opencascade/TColStd_Array2OfReal.hxx \
+ /usr/include/opencascade/NCollection_DefineHArray2.hxx \
+ /usr/include/opencascade/NCollection_DefineArray2.hxx \
+ /usr/include/opencascade/BSplCLib_CacheParams.hxx \
+ /usr/include/opencascade/BSplCLib.hxx \
+ /usr/include/opencascade/BSplCLib_KnotDistribution.hxx \
+ /usr/include/opencascade/BSplCLib_MultDistribution.hxx \
+ /usr/include/opencascade/GeomAbs_BSplKnotDistribution.hxx \
+ /usr/include/opencascade/TColStd_HArray1OfInteger.hxx \
+ /usr/include/opencascade/BSplCLib_EvaluatorFunction.hxx \
+ /usr/include/opencascade/BSplCLib.lxx /usr/include/opencascade/PLib.hxx \
+ /usr/include/opencascade/GeomEvaluator_Surface.hxx
