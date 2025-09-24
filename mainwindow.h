@@ -4,6 +4,12 @@
 #include <QMainWindow>
 #include <QMdiArea>
 
+#include <QMainWindow>
+#include <AIS_InteractiveContext.hxx>
+#include <TopoDS_Shape.hxx>
+#include <map>
+#include <AIS_Shape.hxx>
+
 // 在包含 OpenCASCADE 头文件之前，抑制弃用警告
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -18,6 +24,14 @@
 #include <gp_Pnt.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Ax1.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Circ.hxx>
+#include <STEPControl_Writer.hxx>
+#include <Interface_Static.hxx>
 
 #include <queue>
 #include <set>
@@ -26,6 +40,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <TopTools_ListOfShape.hxx>
+#include <NCollection_DataMap.hxx>
 // 在包含完 OpenCASCADE 头文件之后，恢复警告设置
 #pragma GCC diagnostic pop
 
@@ -46,6 +61,9 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+// 定义一个 DataMap 类型
+typedef NCollection_DataMap<TopoDS_Shape, Handle(AIS_Shape), TopTools_ShapeMapHasher> AIS_ShapeMap;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -54,13 +72,32 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    // 显示形状（支持颜色和线宽）
+    void DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape, const TopoDS_Shape& centerlineShape);
+
+    // 提取中心线
+    TopoDS_Shape ExtractAnalyticalCenterlines(const TopoDS_Shape& shape);
+
     void make_elbow_model(); // 弯管建模
     void import_part(); // 导入数模
-    void extractFace(); // 提取外表面
+    void extractFace(); // 保存外表面
+    void onExtractCenterlineButtonClicked();//生成中心线
+
+    //过程可视化
+    void init_model();
+    void mesh_model();
+    void surface_model();
+    void centerline_model();
+
+    //网格划分
+    void on_meshButton_clicked();
+    void DisplayMeshedShape(const TopoDS_Shape& meshedShape);
 
 private:
     Ui::MainWindow *ui;
     TopoDS_Shape m_currentShape; // 保存当前加载的模型
+    TopoDS_Shape m_extractedOuterSurface; // 存储提取的外壁
+    TopoDS_Shape m_meshedShape; // 保存网格模型
 
     void MakeElbowModel(
         double R_out, double R_in, double length,        // 管体外半径、内半径、长度
@@ -110,5 +147,11 @@ private:
         }
     };
     TopoDS_Shape FindConnectedOuterSurface(const TopoDS_Shape& shape, const TopoDS_Face& seedFace);
+
+
+    //提取中心线
+    Handle(AIS_InteractiveContext) m_context;
+    AIS_ShapeMap m_aisShapeMap;
+    TopoDS_Shape m_extractedCenterline;   // 保存中心线结果
 };
 #endif // MAINWINDOW_H

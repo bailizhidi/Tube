@@ -343,7 +343,7 @@ color: rgb(255, 255, 255);</string>
            <string notr="true">color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
-           <string>提取外表面</string>
+           <string>保存外表面</string>
           </property>
          </widget>
         </widget>
@@ -1954,19 +1954,6 @@ background-color: rgb(36, 31, 49);</string>
       </widget>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QTableWidget" name="tableWidget">
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>100</height>
-       </size>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="1">
      <widget class="QMdiArea" name="mdiArea">
       <property name="styleSheet">
@@ -1981,6 +1968,111 @@ background-color: rgb(36, 31, 49);</string>
         </color>
        </brush>
       </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QTabWidget" name="tabWidget_6">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QTabBar::tab {
+	background-color: rgb(94, 92, 100);
+	color: rgb(0, 0, 0);
+}
+QTabBar::tab:selected {
+	background-color: rgb(222, 221, 218);
+    color: #303030; 
+}
+QTabWidget::pane { border: 0; }
+</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab_9">
+       <attribute name="title">
+        <string>过程可视化</string>
+       </attribute>
+       <widget class="QPushButton" name="pushButton_initmodel">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>10</y>
+          <width>88</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string>原始模型</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshmodel">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>40</y>
+          <width>88</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string>网格模型</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_surfacemodel">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>10</y>
+          <width>88</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string>表面模型</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_centerlinemodel">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>40</y>
+          <width>88</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string>中线模型</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_15">
+       <attribute name="title">
+        <string>结果可视化</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>

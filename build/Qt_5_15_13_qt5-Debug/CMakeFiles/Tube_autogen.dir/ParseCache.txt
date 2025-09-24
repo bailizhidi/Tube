@@ -213,11 +213,60 @@
  mdp:/usr/include/linux/errno.h
  mdp:/usr/include/linux/limits.h
  mdp:/usr/include/locale.h
+ mdp:/usr/include/opencascade/AIS_ClearMode.hxx
+ mdp:/usr/include/opencascade/AIS_DataMapOfIOStatus.hxx
+ mdp:/usr/include/opencascade/AIS_DisplayMode.hxx
+ mdp:/usr/include/opencascade/AIS_DisplayStatus.hxx
+ mdp:/usr/include/opencascade/AIS_DragAction.hxx
+ mdp:/usr/include/opencascade/AIS_GlobalStatus.hxx
+ mdp:/usr/include/opencascade/AIS_InteractiveContext.hxx
+ mdp:/usr/include/opencascade/AIS_InteractiveObject.hxx
+ mdp:/usr/include/opencascade/AIS_KindOfInteractive.hxx
+ mdp:/usr/include/opencascade/AIS_ListOfInteractive.hxx
+ mdp:/usr/include/opencascade/AIS_NArray1OfEntityOwner.hxx
+ mdp:/usr/include/opencascade/AIS_NListOfEntityOwner.hxx
+ mdp:/usr/include/opencascade/AIS_SelectStatus.hxx
+ mdp:/usr/include/opencascade/AIS_Selection.hxx
+ mdp:/usr/include/opencascade/AIS_SelectionModesConcurrency.hxx
+ mdp:/usr/include/opencascade/AIS_SelectionScheme.hxx
+ mdp:/usr/include/opencascade/AIS_Shape.hxx
+ mdp:/usr/include/opencascade/AIS_StatusOfDetection.hxx
+ mdp:/usr/include/opencascade/AIS_StatusOfPick.hxx
+ mdp:/usr/include/opencascade/AIS_TypeOfIso.hxx
+ mdp:/usr/include/opencascade/Adaptor3d_Curve.hxx
+ mdp:/usr/include/opencascade/Adaptor3d_Surface.hxx
+ mdp:/usr/include/opencascade/Aspect_Background.hxx
+ mdp:/usr/include/opencascade/Aspect_Drawable.hxx
+ mdp:/usr/include/opencascade/Aspect_Eye.hxx
+ mdp:/usr/include/opencascade/Aspect_FBConfig.hxx
+ mdp:/usr/include/opencascade/Aspect_FillMethod.hxx
+ mdp:/usr/include/opencascade/Aspect_FrustumLRBT.hxx
+ mdp:/usr/include/opencascade/Aspect_GenId.hxx
+ mdp:/usr/include/opencascade/Aspect_GradientBackground.hxx
+ mdp:/usr/include/opencascade/Aspect_GradientFillMethod.hxx
+ mdp:/usr/include/opencascade/Aspect_Handle.hxx
+ mdp:/usr/include/opencascade/Aspect_HatchStyle.hxx
+ mdp:/usr/include/opencascade/Aspect_InteriorStyle.hxx
+ mdp:/usr/include/opencascade/Aspect_PolygonOffsetMode.hxx
+ mdp:/usr/include/opencascade/Aspect_RenderingContext.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfDeflection.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfDisplayText.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfFacingModel.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfHighlightMethod.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfLine.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfMarker.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfResize.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfStyleText.hxx
+ mdp:/usr/include/opencascade/Aspect_TypeOfTriedronPosition.hxx
+ mdp:/usr/include/opencascade/Aspect_VKey.hxx
+ mdp:/usr/include/opencascade/Aspect_VKeyFlags.hxx
+ mdp:/usr/include/opencascade/Aspect_Window.hxx
  mdp:/usr/include/opencascade/BOPAlgo_GlueEnum.hxx
  mdp:/usr/include/opencascade/BOPAlgo_Operation.hxx
  mdp:/usr/include/opencascade/BOPAlgo_Options.hxx
  mdp:/usr/include/opencascade/BOPAlgo_PBuilder.hxx
  mdp:/usr/include/opencascade/BOPAlgo_PPaveFiller.hxx
+ mdp:/usr/include/opencascade/BRepAdaptor_Surface.hxx
  mdp:/usr/include/opencascade/BRepAlgoAPI_Algo.hxx
  mdp:/usr/include/opencascade/BRepAlgoAPI_BooleanOperation.hxx
  mdp:/usr/include/opencascade/BRepAlgoAPI_BuilderAlgo.hxx
@@ -265,18 +314,156 @@
  mdp:/usr/include/opencascade/BRep_TVertex.hxx
  mdp:/usr/include/opencascade/BRep_TVertex.lxx
  mdp:/usr/include/opencascade/BRep_Tool.hxx
+ mdp:/usr/include/opencascade/BSplCLib.hxx
+ mdp:/usr/include/opencascade/BSplCLib.lxx
+ mdp:/usr/include/opencascade/BSplCLib_CacheParams.hxx
+ mdp:/usr/include/opencascade/BSplCLib_EvaluatorFunction.hxx
+ mdp:/usr/include/opencascade/BSplCLib_KnotDistribution.hxx
+ mdp:/usr/include/opencascade/BSplCLib_MultDistribution.hxx
+ mdp:/usr/include/opencascade/BSplSLib_Cache.hxx
+ mdp:/usr/include/opencascade/BVH_BinaryTree.hxx
+ mdp:/usr/include/opencascade/BVH_Box.hxx
+ mdp:/usr/include/opencascade/BVH_Builder.hxx
+ mdp:/usr/include/opencascade/BVH_Constants.hxx
+ mdp:/usr/include/opencascade/BVH_QuadTree.hxx
+ mdp:/usr/include/opencascade/BVH_Set.hxx
+ mdp:/usr/include/opencascade/BVH_Tree.hxx
+ mdp:/usr/include/opencascade/BVH_Types.hxx
  mdp:/usr/include/opencascade/Bnd_Box.hxx
+ mdp:/usr/include/opencascade/Bnd_Range.hxx
+ mdp:/usr/include/opencascade/Font_FontAspect.hxx
+ mdp:/usr/include/opencascade/Font_Hinting.hxx
+ mdp:/usr/include/opencascade/Font_NameOfFont.hxx
  mdp:/usr/include/opencascade/GC_MakeArcOfCircle.hxx
  mdp:/usr/include/opencascade/GC_Root.hxx
  mdp:/usr/include/opencascade/GC_Root.lxx
  mdp:/usr/include/opencascade/Geom2d_Curve.hxx
  mdp:/usr/include/opencascade/Geom2d_Geometry.hxx
+ mdp:/usr/include/opencascade/GeomAbs_BSplKnotDistribution.hxx
+ mdp:/usr/include/opencascade/GeomAbs_CurveType.hxx
  mdp:/usr/include/opencascade/GeomAbs_Shape.hxx
+ mdp:/usr/include/opencascade/GeomAbs_SurfaceType.hxx
+ mdp:/usr/include/opencascade/GeomAdaptor_Surface.hxx
+ mdp:/usr/include/opencascade/GeomEvaluator_Surface.hxx
  mdp:/usr/include/opencascade/Geom_BoundedCurve.hxx
  mdp:/usr/include/opencascade/Geom_Curve.hxx
+ mdp:/usr/include/opencascade/Geom_CylindricalSurface.hxx
+ mdp:/usr/include/opencascade/Geom_ElementarySurface.hxx
  mdp:/usr/include/opencascade/Geom_Geometry.hxx
  mdp:/usr/include/opencascade/Geom_Surface.hxx
+ mdp:/usr/include/opencascade/Geom_ToroidalSurface.hxx
  mdp:/usr/include/opencascade/Geom_TrimmedCurve.hxx
+ mdp:/usr/include/opencascade/Graphic3d_AlphaMode.hxx
+ mdp:/usr/include/opencascade/Graphic3d_AspectFillArea3d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_AspectLine3d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_AspectMarker3d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_AspectText3d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Aspects.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BSDF.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BndBox3d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BndBox4d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BndBox4f.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BoundBuffer.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Buffer.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BufferRange.hxx
+ mdp:/usr/include/opencascade/Graphic3d_BufferType.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CLight.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CStructure.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CView.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Camera.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CameraTile.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CappingFlags.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ClipPlane.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CubeMap.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CubeMapOrder.hxx
+ mdp:/usr/include/opencascade/Graphic3d_CubeMapSide.hxx
+ mdp:/usr/include/opencascade/Graphic3d_DataStructureManager.hxx
+ mdp:/usr/include/opencascade/Graphic3d_DiagnosticInfo.hxx
+ mdp:/usr/include/opencascade/Graphic3d_GraduatedTrihedron.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Group.hxx
+ mdp:/usr/include/opencascade/Graphic3d_GroupAspect.hxx
+ mdp:/usr/include/opencascade/Graphic3d_HatchStyle.hxx
+ mdp:/usr/include/opencascade/Graphic3d_HorizontalTextAlignment.hxx
+ mdp:/usr/include/opencascade/Graphic3d_IndexBuffer.hxx
+ mdp:/usr/include/opencascade/Graphic3d_LevelOfTextureAnisotropy.hxx
+ mdp:/usr/include/opencascade/Graphic3d_LightSet.hxx
+ mdp:/usr/include/opencascade/Graphic3d_MapOfAspectsToAspects.hxx
+ mdp:/usr/include/opencascade/Graphic3d_MapOfObject.hxx
+ mdp:/usr/include/opencascade/Graphic3d_MapOfStructure.hxx
+ mdp:/usr/include/opencascade/Graphic3d_MarkerImage.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Mat4.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Mat4d.hxx
+ mdp:/usr/include/opencascade/Graphic3d_MaterialAspect.hxx
+ mdp:/usr/include/opencascade/Graphic3d_NMapOfTransient.hxx
+ mdp:/usr/include/opencascade/Graphic3d_NameOfMaterial.hxx
+ mdp:/usr/include/opencascade/Graphic3d_NameOfTexture2D.hxx
+ mdp:/usr/include/opencascade/Graphic3d_NameOfTextureEnv.hxx
+ mdp:/usr/include/opencascade/Graphic3d_PBRMaterial.hxx
+ mdp:/usr/include/opencascade/Graphic3d_PolygonOffset.hxx
+ mdp:/usr/include/opencascade/Graphic3d_PresentationAttributes.hxx
+ mdp:/usr/include/opencascade/Graphic3d_RenderTransparentMethod.hxx
+ mdp:/usr/include/opencascade/Graphic3d_RenderingMode.hxx
+ mdp:/usr/include/opencascade/Graphic3d_RenderingParams.hxx
+ mdp:/usr/include/opencascade/Graphic3d_SequenceOfGroup.hxx
+ mdp:/usr/include/opencascade/Graphic3d_SequenceOfHClipPlane.hxx
+ mdp:/usr/include/opencascade/Graphic3d_SequenceOfStructure.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ShaderAttribute.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ShaderObject.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ShaderProgram.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ShaderVariable.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ShaderVariable.lxx
+ mdp:/usr/include/opencascade/Graphic3d_StereoMode.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Structure.hxx
+ mdp:/usr/include/opencascade/Graphic3d_StructureManager.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextPath.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Texture2D.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Texture2Dmanual.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureEnv.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureMap.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureParams.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureRoot.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureSet.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureSetBits.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TextureUnit.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ToneMappingMethod.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TransModeFlags.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TransformPers.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TransformUtils.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfAnswer.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfBackfacingModel.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfBackground.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfConnection.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfLightSource.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfMaterial.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfPrimitiveArray.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfReflection.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfShaderObject.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfShadingModel.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfStructure.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfTexture.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfTextureFilter.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfTextureMode.hxx
+ mdp:/usr/include/opencascade/Graphic3d_TypeOfVisualization.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Vec.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Vec2.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Vec3.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Vec4.hxx
+ mdp:/usr/include/opencascade/Graphic3d_Vertex.hxx
+ mdp:/usr/include/opencascade/Graphic3d_VerticalTextAlignment.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ViewAffinity.hxx
+ mdp:/usr/include/opencascade/Graphic3d_WorldViewProjState.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ZLayerId.hxx
+ mdp:/usr/include/opencascade/Graphic3d_ZLayerSettings.hxx
+ mdp:/usr/include/opencascade/IFSelect_ReturnStatus.hxx
+ mdp:/usr/include/opencascade/Image_Color.hxx
+ mdp:/usr/include/opencascade/Image_CompressedFormat.hxx
+ mdp:/usr/include/opencascade/Image_Format.hxx
+ mdp:/usr/include/opencascade/Image_PixMap.hxx
+ mdp:/usr/include/opencascade/Image_PixMapData.hxx
+ mdp:/usr/include/opencascade/Interface_ParamType.hxx
+ mdp:/usr/include/opencascade/Interface_Static.hxx
+ mdp:/usr/include/opencascade/Interface_StaticSatisfies.hxx
+ mdp:/usr/include/opencascade/Interface_TypedValue.hxx
  mdp:/usr/include/opencascade/Message.hxx
  mdp:/usr/include/opencascade/Message_Alert.hxx
  mdp:/usr/include/opencascade/Message_AlertExtended.hxx
@@ -291,6 +478,10 @@
  mdp:/usr/include/opencascade/Message_ProgressScope.hxx
  mdp:/usr/include/opencascade/Message_Report.hxx
  mdp:/usr/include/opencascade/Message_SequenceOfPrinters.hxx
+ mdp:/usr/include/opencascade/MoniTool_TypedValue.hxx
+ mdp:/usr/include/opencascade/MoniTool_ValueInterpret.hxx
+ mdp:/usr/include/opencascade/MoniTool_ValueSatisfies.hxx
+ mdp:/usr/include/opencascade/MoniTool_ValueType.hxx
  mdp:/usr/include/opencascade/NCollection_AliasedArray.hxx
  mdp:/usr/include/opencascade/NCollection_Array1.hxx
  mdp:/usr/include/opencascade/NCollection_Array2.hxx
@@ -299,14 +490,20 @@
  mdp:/usr/include/opencascade/NCollection_BaseMap.hxx
  mdp:/usr/include/opencascade/NCollection_BaseSequence.hxx
  mdp:/usr/include/opencascade/NCollection_BaseVector.hxx
+ mdp:/usr/include/opencascade/NCollection_Buffer.hxx
  mdp:/usr/include/opencascade/NCollection_DataMap.hxx
  mdp:/usr/include/opencascade/NCollection_DefaultHasher.hxx
  mdp:/usr/include/opencascade/NCollection_DefineAlloc.hxx
  mdp:/usr/include/opencascade/NCollection_DefineArray1.hxx
+ mdp:/usr/include/opencascade/NCollection_DefineArray2.hxx
  mdp:/usr/include/opencascade/NCollection_DefineHArray1.hxx
+ mdp:/usr/include/opencascade/NCollection_DefineHArray2.hxx
+ mdp:/usr/include/opencascade/NCollection_DefineHSequence.hxx
+ mdp:/usr/include/opencascade/NCollection_DefineSequence.hxx
  mdp:/usr/include/opencascade/NCollection_Handle.hxx
  mdp:/usr/include/opencascade/NCollection_IndexedDataMap.hxx
  mdp:/usr/include/opencascade/NCollection_IndexedMap.hxx
+ mdp:/usr/include/opencascade/NCollection_Lerp.hxx
  mdp:/usr/include/opencascade/NCollection_List.hxx
  mdp:/usr/include/opencascade/NCollection_ListNode.hxx
  mdp:/usr/include/opencascade/NCollection_Map.hxx
@@ -323,7 +520,14 @@
  mdp:/usr/include/opencascade/NCollection_Vec3.hxx
  mdp:/usr/include/opencascade/NCollection_Vec4.hxx
  mdp:/usr/include/opencascade/NCollection_Vector.hxx
+ mdp:/usr/include/opencascade/OSD_Chronometer.hxx
  mdp:/usr/include/opencascade/OSD_MemInfo.hxx
+ mdp:/usr/include/opencascade/OSD_PThread.hxx
+ mdp:/usr/include/opencascade/OSD_Path.hxx
+ mdp:/usr/include/opencascade/OSD_SysType.hxx
+ mdp:/usr/include/opencascade/OSD_Thread.hxx
+ mdp:/usr/include/opencascade/OSD_ThreadFunction.hxx
+ mdp:/usr/include/opencascade/PLib.hxx
  mdp:/usr/include/opencascade/Poly_Array1OfTriangle.hxx
  mdp:/usr/include/opencascade/Poly_ArrayOfNodes.hxx
  mdp:/usr/include/opencascade/Poly_ArrayOfUVNodes.hxx
@@ -336,12 +540,69 @@
  mdp:/usr/include/opencascade/Poly_Triangle.hxx
  mdp:/usr/include/opencascade/Poly_Triangulation.hxx
  mdp:/usr/include/opencascade/Precision.hxx
+ mdp:/usr/include/opencascade/Prs3d_DimensionUnits.hxx
+ mdp:/usr/include/opencascade/Prs3d_Drawer.hxx
+ mdp:/usr/include/opencascade/Prs3d_Presentation.hxx
+ mdp:/usr/include/opencascade/Prs3d_TypeOfHLR.hxx
+ mdp:/usr/include/opencascade/Prs3d_TypeOfHighlight.hxx
+ mdp:/usr/include/opencascade/Prs3d_VertexDrawMode.hxx
+ mdp:/usr/include/opencascade/PrsMgr_DisplayStatus.hxx
+ mdp:/usr/include/opencascade/PrsMgr_ListOfPresentableObjects.hxx
+ mdp:/usr/include/opencascade/PrsMgr_ListOfPresentations.hxx
+ mdp:/usr/include/opencascade/PrsMgr_PresentableObject.hxx
+ mdp:/usr/include/opencascade/PrsMgr_Presentation.hxx
+ mdp:/usr/include/opencascade/PrsMgr_PresentationManager.hxx
+ mdp:/usr/include/opencascade/PrsMgr_Presentations.hxx
+ mdp:/usr/include/opencascade/PrsMgr_TypeOfPresentation3d.hxx
+ mdp:/usr/include/opencascade/Quantity_Color.hxx
+ mdp:/usr/include/opencascade/Quantity_ColorRGBA.hxx
+ mdp:/usr/include/opencascade/Quantity_NameOfColor.hxx
+ mdp:/usr/include/opencascade/Quantity_TypeOfColor.hxx
+ mdp:/usr/include/opencascade/STEPControl_StepModelType.hxx
+ mdp:/usr/include/opencascade/STEPControl_Writer.hxx
+ mdp:/usr/include/opencascade/Select3D_BVHBuilder3d.hxx
+ mdp:/usr/include/opencascade/Select3D_BndBox3d.hxx
+ mdp:/usr/include/opencascade/Select3D_SensitiveEntity.hxx
+ mdp:/usr/include/opencascade/Select3D_TypeOfSensitivity.hxx
+ mdp:/usr/include/opencascade/SelectBasics_PickResult.hxx
+ mdp:/usr/include/opencascade/SelectBasics_SelectingVolumeManager.hxx
+ mdp:/usr/include/opencascade/SelectMgr_AndOrFilter.hxx
+ mdp:/usr/include/opencascade/SelectMgr_BVHThreadPool.hxx
+ mdp:/usr/include/opencascade/SelectMgr_BaseIntersector.hxx
+ mdp:/usr/include/opencascade/SelectMgr_CompositionFilter.hxx
+ mdp:/usr/include/opencascade/SelectMgr_EntityOwner.hxx
+ mdp:/usr/include/opencascade/SelectMgr_Filter.hxx
+ mdp:/usr/include/opencascade/SelectMgr_FilterType.hxx
+ mdp:/usr/include/opencascade/SelectMgr_IndexedDataMapOfOwnerCriterion.hxx
+ mdp:/usr/include/opencascade/SelectMgr_IndexedMapOfOwner.hxx
+ mdp:/usr/include/opencascade/SelectMgr_ListOfFilter.hxx
+ mdp:/usr/include/opencascade/SelectMgr_PickingStrategy.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SelectableObject.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SelectableObjectSet.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SelectingVolumeManager.hxx
+ mdp:/usr/include/opencascade/SelectMgr_Selection.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SelectionManager.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SelectionType.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SensitiveEntity.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SequenceOfOwner.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SequenceOfSelection.hxx
+ mdp:/usr/include/opencascade/SelectMgr_SortCriterion.hxx
+ mdp:/usr/include/opencascade/SelectMgr_StateOfSelection.hxx
+ mdp:/usr/include/opencascade/SelectMgr_ToleranceMap.hxx
+ mdp:/usr/include/opencascade/SelectMgr_TypeOfBVHUpdate.hxx
+ mdp:/usr/include/opencascade/SelectMgr_TypeOfDepthTolerance.hxx
+ mdp:/usr/include/opencascade/SelectMgr_TypeOfUpdate.hxx
+ mdp:/usr/include/opencascade/SelectMgr_VectorTypes.hxx
+ mdp:/usr/include/opencascade/SelectMgr_ViewClipRange.hxx
+ mdp:/usr/include/opencascade/SelectMgr_ViewerSelector.hxx
  mdp:/usr/include/opencascade/Standard.hxx
  mdp:/usr/include/opencascade/Standard_Address.hxx
  mdp:/usr/include/opencascade/Standard_Assert.hxx
  mdp:/usr/include/opencascade/Standard_Boolean.hxx
+ mdp:/usr/include/opencascade/Standard_Byte.hxx
  mdp:/usr/include/opencascade/Standard_CString.hxx
  mdp:/usr/include/opencascade/Standard_Character.hxx
+ mdp:/usr/include/opencascade/Standard_Condition.hxx
  mdp:/usr/include/opencascade/Standard_ConstructionError.hxx
  mdp:/usr/include/opencascade/Standard_DefineAlloc.hxx
  mdp:/usr/include/opencascade/Standard_DefineException.hxx
@@ -361,6 +622,7 @@
  mdp:/usr/include/opencascade/Standard_Macro.hxx
  mdp:/usr/include/opencascade/Standard_Mutex.hxx
  mdp:/usr/include/opencascade/Standard_NoSuchObject.hxx
+ mdp:/usr/include/opencascade/Standard_NotImplemented.hxx
  mdp:/usr/include/opencascade/Standard_NullObject.hxx
  mdp:/usr/include/opencascade/Standard_OStream.hxx
  mdp:/usr/include/opencascade/Standard_OutOfMemory.hxx
@@ -384,15 +646,33 @@
  mdp:/usr/include/opencascade/Standard_TypeMismatch.hxx
  mdp:/usr/include/opencascade/Standard_math.hxx
  mdp:/usr/include/opencascade/Standard_values.h
+ mdp:/usr/include/opencascade/StdSelect_TypeOfSelectionImage.hxx
+ mdp:/usr/include/opencascade/StdSelect_ViewerSelector3d.hxx
  mdp:/usr/include/opencascade/Sweep_NumShape.hxx
  mdp:/usr/include/opencascade/Sweep_NumShape.lxx
  mdp:/usr/include/opencascade/Sweep_NumShapeTool.hxx
+ mdp:/usr/include/opencascade/TColStd_Array1OfAsciiString.hxx
+ mdp:/usr/include/opencascade/TColStd_Array1OfByte.hxx
  mdp:/usr/include/opencascade/TColStd_Array1OfInteger.hxx
  mdp:/usr/include/opencascade/TColStd_Array1OfReal.hxx
  mdp:/usr/include/opencascade/TColStd_Array2OfBoolean.hxx
+ mdp:/usr/include/opencascade/TColStd_Array2OfReal.hxx
+ mdp:/usr/include/opencascade/TColStd_HArray1OfAsciiString.hxx
+ mdp:/usr/include/opencascade/TColStd_HArray1OfByte.hxx
+ mdp:/usr/include/opencascade/TColStd_HArray1OfInteger.hxx
  mdp:/usr/include/opencascade/TColStd_HArray1OfReal.hxx
+ mdp:/usr/include/opencascade/TColStd_HArray2OfReal.hxx
+ mdp:/usr/include/opencascade/TColStd_HSequenceOfAsciiString.hxx
+ mdp:/usr/include/opencascade/TColStd_HSequenceOfHAsciiString.hxx
+ mdp:/usr/include/opencascade/TColStd_IndexedDataMapOfStringString.hxx
+ mdp:/usr/include/opencascade/TColStd_ListOfInteger.hxx
+ mdp:/usr/include/opencascade/TColStd_MapTransientHasher.hxx
+ mdp:/usr/include/opencascade/TColStd_SequenceOfAsciiString.hxx
+ mdp:/usr/include/opencascade/TColStd_SequenceOfHAsciiString.hxx
+ mdp:/usr/include/opencascade/TColStd_SequenceOfInteger.hxx
  mdp:/usr/include/opencascade/TColgp_Array1OfPnt.hxx
  mdp:/usr/include/opencascade/TColgp_Array1OfPnt2d.hxx
+ mdp:/usr/include/opencascade/TColgp_Array2OfPnt.hxx
  mdp:/usr/include/opencascade/TColgp_HArray1OfPnt.hxx
  mdp:/usr/include/opencascade/TColgp_HArray1OfPnt2d.hxx
  mdp:/usr/include/opencascade/TCollection_AsciiString.hxx
@@ -408,6 +688,7 @@
  mdp:/usr/include/opencascade/TopAbs_ShapeEnum.hxx
  mdp:/usr/include/opencascade/TopAbs_State.hxx
  mdp:/usr/include/opencascade/TopExp.hxx
+ mdp:/usr/include/opencascade/TopLoc_Datum3D.hxx
  mdp:/usr/include/opencascade/TopLoc_ItemLocation.hxx
  mdp:/usr/include/opencascade/TopLoc_Location.hxx
  mdp:/usr/include/opencascade/TopLoc_Location.lxx
@@ -461,12 +742,24 @@
  mdp:/usr/include/opencascade/gp_Ax1.hxx
  mdp:/usr/include/opencascade/gp_Ax2.hxx
  mdp:/usr/include/opencascade/gp_Ax2d.hxx
+ mdp:/usr/include/opencascade/gp_Ax3.hxx
+ mdp:/usr/include/opencascade/gp_Circ.hxx
+ mdp:/usr/include/opencascade/gp_Cone.hxx
+ mdp:/usr/include/opencascade/gp_Cylinder.hxx
  mdp:/usr/include/opencascade/gp_Dir.hxx
  mdp:/usr/include/opencascade/gp_Dir2d.hxx
+ mdp:/usr/include/opencascade/gp_Elips.hxx
+ mdp:/usr/include/opencascade/gp_GTrsf.hxx
+ mdp:/usr/include/opencascade/gp_Hypr.hxx
+ mdp:/usr/include/opencascade/gp_Lin.hxx
  mdp:/usr/include/opencascade/gp_Mat.hxx
  mdp:/usr/include/opencascade/gp_Mat2d.hxx
+ mdp:/usr/include/opencascade/gp_Parab.hxx
+ mdp:/usr/include/opencascade/gp_Pln.hxx
  mdp:/usr/include/opencascade/gp_Pnt.hxx
  mdp:/usr/include/opencascade/gp_Pnt2d.hxx
+ mdp:/usr/include/opencascade/gp_Sphere.hxx
+ mdp:/usr/include/opencascade/gp_Torus.hxx
  mdp:/usr/include/opencascade/gp_Trsf.hxx
  mdp:/usr/include/opencascade/gp_Trsf2d.hxx
  mdp:/usr/include/opencascade/gp_TrsfForm.hxx

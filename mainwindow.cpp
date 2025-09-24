@@ -11,6 +11,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_confirm, &QPushButton::clicked, this, &MainWindow::make_elbow_model);
     connect(ui->pushButton_ImportPart, &QPushButton::clicked, this, &MainWindow::import_part);
     connect(ui->pushButton_extractFace, &QPushButton::clicked, this, &MainWindow::extractFace);
+    connect(ui->pushButton_CenterLine, &QPushButton::clicked,this, &MainWindow::onExtractCenterlineButtonClicked);
+    connect(ui->pushButton_Mesh1, &QPushButton::clicked,this, &MainWindow::on_meshButton_clicked);
+
+    //过程可视化
+    connect(ui->pushButton_initmodel, &QPushButton::clicked,this, &MainWindow::init_model);
+    connect(ui->pushButton_meshmodel, &QPushButton::clicked,this, &MainWindow::mesh_model);
+    connect(ui->pushButton_surfacemodel, &QPushButton::clicked,this, &MainWindow::surface_model);
+    connect(ui->pushButton_centerlinemodel, &QPushButton::clicked,this, &MainWindow::centerline_model);
 }
 
 MainWindow::~MainWindow()
@@ -149,6 +157,7 @@ vtkSmartPointer<vtkActor> MainWindow::CreateVTKActor(vtkSmartPointer<vtkPolyData
     return actor;
 }
 
+//建模函数
 void MainWindow::MakeElbowModel(
     double tube_outer_radius, double tube_inner_radius, double tube_length,
     double rotary_sleeve_thickness, double rotary_sleeve_length, double rotary_sleeve_pos,
@@ -400,6 +409,7 @@ void MainWindow::MakeElbowModel(
     }
 }
 
+//显示函数
 void MainWindow::ShowModelInMdiArea(vtkSmartPointer<vtkRenderer> renderer) {
     try {
         // 清空MDI区域的所有子窗口
@@ -441,7 +451,8 @@ void MainWindow::ShowModelInMdiArea(vtkSmartPointer<vtkRenderer> renderer) {
         QMessageBox::critical(this, "错误", QString("显示模型失败: %1").arg(e.what()));
     }
 }
-// 实现函数
+
+//实现函数
 void MainWindow::make_elbow_model() {
     qDebug() << "弯管模型创建...";
 
@@ -687,7 +698,6 @@ void MainWindow::DisplayShape(const TopoDS_Shape& shape)
     }
 }
 
-
 //显示数模
 void MainWindow::import_part()
 {
@@ -726,6 +736,7 @@ void MainWindow::import_part()
 #include <vtkRendererCollection.h>
 #include <unordered_set>
 #include <BRepAdaptor_Surface.hxx>
+#include <STEPControl_Writer.hxx>
 
 //鼠标点击事件响应函数
 void MainWindow::OnLeftButtonDown(vtkObject* obj, unsigned long eid, void* clientdata, void* calldata)
@@ -747,6 +758,7 @@ void MainWindow::OnLeftButtonDown(vtkObject* obj, unsigned long eid, void* clien
             TopoDS_Face clickedFace = it->second;
             TopoDS_Shape outerSurface = self->FindConnectedOuterSurface(self->m_currentShape, clickedFace);
             if (!outerSurface.IsNull()) {
+                self->m_extractedOuterSurface = outerSurface; //保存结果
                 self->DisplayShape(outerSurface);
             }
         }
@@ -875,7 +887,645 @@ void MainWindow::GetFacesSharingEdge(const TopoDS_Shape& shape, const TopoDS_Edg
     }
 }
 
+//保存外壁
 void MainWindow::extractFace()
 {
-    // 你的实现代码
+    if (m_extractedOuterSurface.IsNull()) {
+        QMessageBox::warning(this, "警告", "没有提取到外壁模型！");
+        return;
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("保存外壁模型"), "", tr("STEP 文件 (*.stp *.step)"));
+
+    if (fileName.isEmpty()) {
+        return; // 用户取消保存
+    }
+
+    // 确保文件名以 .stp 或 .step 结尾
+    if (!fileName.endsWith(".stp", Qt::CaseInsensitive) &&
+        !fileName.endsWith(".step", Qt::CaseInsensitive)) {
+        fileName += ".stp";
+    }
+
+    STEPControl_Writer writer; // 或者 STEPControl_Writer
+    // 使用 STEPControl_Writer 更简单
+    STEPControl_Writer stepWriter;
+
+    // 设置 STEP 标准（可选）
+    Interface_Static::SetCVal("write.step.schema", "AP214");
+
+    // 写入模型
+    stepWriter.Transfer(m_extractedOuterSurface, STEPControl_AsIs);
+    IFSelect_ReturnStatus status = stepWriter.Write(fileName.toStdString().c_str());
+
+    if (status == IFSelect_RetDone) {
+        QMessageBox::information(this, "成功", "外壁模型已保存为: " + fileName);
+    } else {
+        QMessageBox::critical(this, "错误", "保存失败！");
+    }
 }
+
+
+//----------提取中心线段----------
+#include <QFileDialog>
+#include <QMessageBox>
+#include <Prs3d_Drawer.hxx>
+#include <Prs3d_ShadingAspect.hxx>
+#include <Prs3d_LineAspect.hxx>
+#include <Geom_Line.hxx>
+
+// OpenCASCADE 头文件
+#include <BRepAdaptor_Surface.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <gp_Lin.hxx>
+#include <gp_Circ.hxx>
+#include <STEPControl_Writer.hxx>
+#include <Interface_Static.hxx>
+#include <BRepLib.hxx>
+#include <BRep_Tool.hxx> // for BRep_Tool::Polygon3D
+#include <BRepMesh_IncrementalMesh.hxx> // 如果需要对边进行网格化
+#include <vtkPolyLine.h> // ✅ 添加这个头文件
+
+// 显示形状（支持颜色和线宽）
+#include <vtkPolyLine.h> // 确保已包含
+
+void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape, const TopoDS_Shape& centerlineShape)
+{
+    try {
+        if (outerShape.IsNull() || centerlineShape.IsNull()) {
+            QMessageBox::warning(this, "警告", "无效的几何体，无法显示！");
+            return;
+        }
+
+        // 清理 ui->mdiArea 中的旧内容
+        QLayout* layout = ui->mdiArea->layout();
+        if (layout) {
+            QLayoutItem* item;
+            while ((item = layout->takeAt(0)) != nullptr) {
+                if (item->widget()) {
+                    delete item->widget();
+                }
+                delete item;
+            }
+        } else {
+            layout = new QVBoxLayout(ui->mdiArea);
+            ui->mdiArea->setLayout(layout);
+        }
+
+        // 创建 VTK 渲染部件
+        QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget(ui->mdiArea);
+        vtkWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+        // 创建渲染器
+        vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+        renderer->SetBackground(0.1, 0.1, 0.1); // 深灰色背景
+
+        // 创建渲染窗口
+        vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow =
+            vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+        vtkWidget->setRenderWindow(renderWindow);
+        renderWindow->AddRenderer(renderer);
+
+        // ================== 1. 显示外壁模型 (半透明) ==================
+        {
+            BRepMesh_IncrementalMesh mesh(outerShape, 0.01); // 网格精度
+            mesh.Perform();
+            if (!mesh.IsDone()) {
+                throw std::runtime_error("外壁模型网格生成失败！");
+            }
+
+            vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+            vtkSmartPointer<vtkCellArray> triangles = vtkSmartPointer<vtkCellArray>::New();
+            vtkIdType pointIdOffset = 0;
+
+            TopExp_Explorer exp(outerShape, TopAbs_FACE);
+            for (; exp.More(); exp.Next()) {
+                TopoDS_Face face = TopoDS::Face(exp.Current());
+                TopLoc_Location loc;
+                Handle(Poly_Triangulation) triFace = BRep_Tool::Triangulation(face, loc);
+
+                if (!triFace.IsNull()) {
+                    int numNodes = triFace->NbNodes();
+                    int numTriangles = triFace->NbTriangles();
+
+                    for (int i = 1; i <= numNodes; i++) {
+                        gp_Pnt p = triFace->Node(i);
+                        if (!loc.IsIdentity()) {
+                            p.Transform(loc.Transformation());
+                        }
+                        points->InsertNextPoint(p.X(), p.Y(), p.Z());
+                    }
+
+                    for (int i = 1; i <= numTriangles; i++) {
+                        Poly_Triangle tri = triFace->Triangle(i);
+                        Standard_Integer n1, n2, n3;
+                        tri.Get(n1, n2, n3);
+
+                        vtkIdType ids[3] = {n1-1+pointIdOffset, n2-1+pointIdOffset, n3-1+pointIdOffset};
+                        triangles->InsertNextCell(3, ids);
+                    }
+                    pointIdOffset += numNodes;
+                }
+            }
+
+            vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+            polyData->SetPoints(points);
+            polyData->SetPolys(triangles);
+
+            vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+            mapper->SetInputData(polyData);
+
+            vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+            actor->SetMapper(mapper);
+            actor->GetProperty()->SetColor(0.8, 0.8, 0.8); // 灰色
+            actor->GetProperty()->SetOpacity(0.5);         // 半透明
+            //actor->GetProperty()->SetEdgeVisibilityOff();
+            actor->GetProperty()->SetInterpolationToPhong();
+
+            renderer->AddActor(actor);
+        }
+
+        // ================== 2. 显示中心线 (红色) ==================
+        {
+            vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+            vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+            vtkIdType pointIdCounter = 0;
+
+            TopExp_Explorer exp(centerlineShape, TopAbs_EDGE);
+            for (; exp.More(); exp.Next()) {
+                TopoDS_Edge edge = TopoDS::Edge(exp.Current());
+                if (edge.IsNull()) continue;
+
+                Standard_Real first, last;
+                Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, first, last);
+                if (curve.IsNull()) continue;
+
+                const int numPoints = 50; // 用于离散化曲线的点数
+                vtkSmartPointer<vtkPolyLine> polyline = vtkSmartPointer<vtkPolyLine>::New();
+                polyline->GetPointIds()->SetNumberOfIds(numPoints);
+
+                for (int i = 0; i < numPoints; ++i) {
+                    Standard_Real u = first + (last - first) * i / (numPoints - 1);
+                    gp_Pnt p = curve->Value(u);
+                    points->InsertNextPoint(p.X(), p.Y(), p.Z());
+                    polyline->GetPointIds()->SetId(i, pointIdCounter++);
+                }
+                lines->InsertNextCell(polyline);
+            }
+
+            vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+            polyData->SetPoints(points);
+            polyData->SetLines(lines);
+
+            vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+            mapper->SetInputData(polyData);
+
+            vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+            actor->SetMapper(mapper);
+            actor->GetProperty()->SetColor(1.0, 0.0, 0.0); // 红色
+            actor->GetProperty()->SetLineWidth(3.0);       // 线宽
+
+            renderer->AddActor(actor);
+        }
+
+        // ================== 3. 渲染 ==================
+        renderer->ResetCamera(); // 自动调整相机视角
+
+        layout->addWidget(vtkWidget);
+        renderWindow->Render();
+
+        // 设置交互器
+        vtkSmartPointer<vtkRenderWindowInteractor> interactor = renderWindow->GetInteractor();
+        vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
+            vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+        interactor->SetInteractorStyle(style);
+        interactor->Initialize(); // 初始化交互器
+        // interactor->Start();      // 对于嵌入式部件，这通常由 Qt 管理
+
+        qDebug() << "外壁模型和中心线已成功显示。";
+
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "错误", QString("显示模型失败: %1").arg(e.what()));
+    }
+}
+
+// 提取中心线
+#include <BRepLib.hxx> // ✅ 确保包含这个头文件
+#include <Geom_Line.hxx> // 如果使用替代方案
+#include <Geom_Circle.hxx> // <-- 用于处理圆弧
+#include <GeomAdaptor_Curve.hxx> // <-- 用于适配曲线
+
+TopoDS_Shape MainWindow::ExtractAnalyticalCenterlines(const TopoDS_Shape& shape)
+{
+    qDebug() << "ExtractAnalyticalCenterlines 开始处理 shape type:" << shape.ShapeType();
+
+    BRep_Builder builder;
+    TopoDS_Compound comp;
+    builder.MakeCompound(comp);
+
+    TopExp_Explorer exp(shape, TopAbs_FACE);
+    int faceCount = 0;
+    for (; exp.More(); exp.Next()) {
+        faceCount++;
+        TopoDS_Face face = TopoDS::Face(exp.Current());
+
+        if (face.IsNull()) {
+            qDebug() << "  跳过空面";
+            continue;
+        }
+
+        BRepAdaptor_Surface surf(face);
+        GeomAbs_SurfaceType surfType = surf.GetType();
+
+        qDebug() << "  处理第" << faceCount << "个面, 类型:" << surfType;
+
+        if (surfType != GeomAbs_Cylinder && surfType != GeomAbs_Torus) {
+            continue;
+        }
+
+        if (surfType == GeomAbs_Cylinder) {
+            qDebug() << "    -> 圆柱面";
+            try {
+                gp_Ax1 axis = surf.Cylinder().Axis();
+                Handle(Geom_Line) line = new Geom_Line(axis);
+
+                // 在圆柱面处理部分
+                TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(line, -500, 500);
+                if (!edge.IsNull()) {
+                    // ✅ 添加几何验证
+                    BRepLib::BuildCurves3d(edge);
+                    Standard_Real first, last;
+                    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, first, last);
+                    if (curve.IsNull()) {
+                        qDebug() << "    -> Edge 几何无效，跳过";
+                    } else {
+                        builder.Add(comp, edge);
+                        qDebug() << "    -> 成功提取轴线";
+                    }
+                }
+
+            } catch (...) {
+                qDebug() << "    -> 提取圆柱轴线时发生异常";
+            }
+        }
+        else if (surfType == GeomAbs_Torus) {
+            qDebug() << "    -> 环面";
+            try {
+                gp_Torus torus = surf.Torus();
+                gp_Ax1 axis = torus.Axis();
+                gp_Circ centerCircle(gp_Ax2(axis.Location(), axis.Direction()), torus.MajorRadius());
+
+                // 在环面处理部分
+                TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(centerCircle);
+                if (!edge.IsNull()) {
+                    // ✅ 添加几何验证
+                    BRepLib::BuildCurves3d(edge);
+                    Standard_Real first, last;
+                    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, first, last);
+                    if (curve.IsNull()) {
+                        qDebug() << "    -> Edge 几何无效，跳过";
+                    } else {
+                        builder.Add(comp, edge);
+                        qDebug() << "    -> 成功提取中心圆";
+                    }
+                }
+
+            } catch (...) {
+                qDebug() << "    -> 提取环面中心圆时发生异常";
+            }
+        }
+    }
+
+    qDebug() << "ExtractAnalyticalCenterlines 处理完成，共处理" << faceCount << "个面";
+    return comp;
+}
+
+// 按钮点击槽函数
+void MainWindow::onExtractCenterlineButtonClicked()
+{
+    qDebug() << "=== 开始提取中心线 ===";
+
+    if (m_extractedOuterSurface.IsNull()) {
+        qDebug() << "警告: m_extractedOuterSurface 为空";
+        QMessageBox::warning(this, "警告", "没有提取到外壁模型！");
+        return;
+    }
+
+    qDebug() << "Outer surface type:" << m_extractedOuterSurface.ShapeType();
+
+    qDebug() << "调用 ExtractAnalyticalCenterlines...";
+    TopoDS_Shape centerlines = ExtractAnalyticalCenterlines(m_extractedOuterSurface);
+    qDebug() << "ExtractAnalyticalCenterlines 返回";
+
+    if (centerlines.IsNull()) {
+        qDebug() << "警告: 未提取到中心线";
+        QMessageBox::warning(this, "警告", "未找到任何圆柱/环面，无法提取中心线！");
+        return;
+    }
+
+    qDebug() << "保存中心线结果";
+    m_extractedCenterline = centerlines;
+
+    qDebug() << "显示外壁模型(透明)和中心线(红色)";
+    // ✅ 调用新的显示函数，传入外壁和中心线
+    DisplayOuterSurfaceAndCenterline(m_extractedOuterSurface, centerlines);
+
+    qDebug() << "=== 中心线提取及显示完成 ===";
+}
+
+//----------网格划分-----------
+#include <BRepBuilderAPI_Copy.hxx>
+void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
+{
+    try {
+        qDebug() << "=== DisplayMeshedShape (透明网格) 开始 ===";
+        if (meshedShape.IsNull()) {
+            QMessageBox::warning(this, tr("警告"), tr("无效的几何体，无法显示！"));
+            qDebug() << "DisplayMeshedShape: 传入的 meshedShape 为空。";
+            return;
+        }
+
+        // --- 1. 清理 ui->mdiArea 中的旧内容 ---
+        QLayout* layout = ui->mdiArea->layout();
+        if (layout) {
+            QLayoutItem* item;
+            while ((item = layout->takeAt(0)) != nullptr) {
+                if (item->widget()) {
+                    item->widget()->setParent(nullptr);
+                    delete item->widget();
+                }
+                delete item;
+            }
+        } else {
+            layout = new QVBoxLayout(ui->mdiArea);
+            ui->mdiArea->setLayout(layout);
+        }
+
+        // --- 2. 创建 VTK 渲染部件 ---
+        QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget(ui->mdiArea);
+        vtkWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+        // --- 3. 创建渲染器和渲染窗口 ---
+        vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+        renderer->SetBackground(1, 1, 1); // 白色背景
+
+        vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow =
+            vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+        vtkWidget->setRenderWindow(renderWindow);
+        renderWindow->AddRenderer(renderer);
+
+        // --- 4. 从已划分的 Shape 提取 VTK PolyData ---
+        vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+        vtkSmartPointer<vtkCellArray> triangles = vtkSmartPointer<vtkCellArray>::New();
+        int pointIdOffset = 0;
+        int totalPointsAdded = 0;
+        int totalCellsAdded = 0;
+
+        m_faceMap.clear(); // 清空旧的面映射
+        std::vector<TopoDS_Face> faceOrderList;
+        TopExp_Explorer tempExp(meshedShape, TopAbs_FACE);
+        int faceCount = 0;
+        for (; tempExp.More(); tempExp.Next()) {
+            faceOrderList.push_back(TopoDS::Face(tempExp.Current()));
+            faceCount++;
+        }
+        qDebug() << "DisplayMeshedShape: 找到 " << faceCount << " 个面。";
+
+        int currentVtkCellId = 0;
+        for (const auto& face : faceOrderList) {
+            TopLoc_Location loc;
+            Handle(Poly_Triangulation) triFace = BRep_Tool::Triangulation(face, loc);
+
+            if (!triFace.IsNull()) {
+                int numNodes = triFace->NbNodes();
+                int numTriangles = triFace->NbTriangles();
+
+                for (int i = 1; i <= numNodes; i++) {
+                    gp_Pnt p = triFace->Node(i);
+                    if (!loc.IsIdentity()) {
+                        p.Transform(loc.Transformation());
+                    }
+                    points->InsertNextPoint(p.X(), p.Y(), p.Z());
+                }
+                totalPointsAdded += numNodes;
+
+                for (int i = 1; i <= numTriangles; i++) {
+                    Poly_Triangle tri = triFace->Triangle(i);
+                    Standard_Integer n1, n2, n3;
+                    tri.Get(n1, n2, n3);
+
+                    vtkIdType ids[3] = {n1 - 1 + pointIdOffset, n2 - 1 + pointIdOffset, n3 - 1 + pointIdOffset};
+                    vtkIdType cellId = triangles->InsertNextCell(3, ids);
+
+                    m_faceMap[currentVtkCellId + i - 1] = face;
+                }
+                totalCellsAdded += numTriangles;
+                pointIdOffset += numNodes;
+                currentVtkCellId += numTriangles;
+            }
+        }
+
+        qDebug() << "DisplayMeshedShape: 总共添加了 " << totalPointsAdded << " 个顶点, "
+                 << totalCellsAdded << " 个三角形。";
+
+        if (totalCellsAdded == 0) {
+            QString warnMsg = tr("模型似乎没有有效的网格数据（0 个三角形），无法显示。");
+            qDebug() << "DisplayMeshedShape: " << warnMsg;
+            QMessageBox::warning(this, tr("警告"), warnMsg);
+            delete vtkWidget;
+            return;
+        }
+
+        // --- 5. 创建 VTK PolyData 对象 ---
+        vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+        polyData->SetPoints(points);
+        polyData->SetPolys(triangles);
+
+        // --- 6. 创建 Mapper 和 Actor ---
+        vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper->SetInputData(polyData);
+
+        vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+        actor->SetMapper(mapper);
+
+        // --- 7. 关键修改：设置透明度和网格线显示 ---
+        // 设置面颜色 (可选，透明时可能看不清)
+        actor->GetProperty()->SetColor(0.8, 0.8, 0.8); // 灰色
+        // 设置不透明度 (0.0 完全透明, 1.0 完全不透明)
+        actor->GetProperty()->SetOpacity(0.3); // 例如，30% 不透明度
+        // 开启边缘/网格线显示
+        actor->GetProperty()->EdgeVisibilityOn();
+        // 设置边缘/网格线颜色 (例如，黑色)
+        actor->GetProperty()->SetEdgeColor(0, 0, 0);
+        // 设置表面表示为表面 (SURFACE) 或线框 (WIREFRAME)
+        // WIREFRAME 只显示网格线，SURFACE 显示面和线
+        // 如果只想显示线，用 WIREFRAME；如果想显示透明面+线，用 SURFACE
+        actor->GetProperty()->SetRepresentationToSurface(); // 或 SetRepresentationToWireframe();
+
+        // --- 8. 添加 Actor 到渲染器并重置相机 ---
+        renderer->AddActor(actor);
+        renderer->ResetCamera();
+
+        // --- 9. 将 VTK 部件添加到 UI 布局 ---
+        layout->addWidget(vtkWidget);
+
+        // --- 10. 触发渲染 ---
+        renderWindow->Render();
+
+        // --- 11. 设置交互器和样式 ---
+        vtkSmartPointer<vtkRenderWindowInteractor> interactor = renderWindow->GetInteractor();
+        if (interactor) {
+            vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
+                vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+            interactor->SetInteractorStyle(style);
+        } else {
+            qWarning() << "DisplayMeshedShape: 获取 VTK 渲染窗口交互器失败。";
+        }
+
+        // --- 12. 缓存生成的 PolyData ---
+        //m_cachedMesh = polyData;
+
+        qDebug() << "DisplayMeshedShape: 透明网格模型显示成功。";
+        qDebug() << "=== DisplayMeshedShape (透明网格) 结束 ===";
+
+    } catch (const std::exception& e) {
+        QString errorMsg = QString("DisplayMeshedShape: 显示透明网格模型失败: %1").arg(e.what());
+        QMessageBox::critical(this, tr("错误"), errorMsg);
+        qDebug() << errorMsg;
+    } catch (...) {
+        QString errorMsg = QString("DisplayMeshedShape: 显示透明网格模型时发生未知异常。");
+        QMessageBox::critical(this, tr("错误"), errorMsg);
+        qDebug() << errorMsg;
+    }
+}
+
+
+void MainWindow::on_meshButton_clicked()
+{
+    qDebug() << "=== 开始执行网格划分并存储新模型 ===";
+
+    // 1. 检查是否有原始模型加载
+    if (m_currentShape.IsNull()) {
+        QMessageBox::warning(this, tr("网格划分"), tr("请先加载一个模型！"));
+        qDebug() << "网格划分失败：未加载原始模型。";
+        return;
+    }
+
+    // 2. 从界面获取网格大小参数
+    double linearDeflection = ui->spinBox->value();
+    // 确保值是正数
+    if (linearDeflection <= 0.0) {
+        QMessageBox::warning(this, tr("网格划分"), tr("网格大小必须大于 0！"));
+        qDebug() << "网格划分失败：网格大小无效 (" << linearDeflection << ")。";
+        return;
+    }
+
+    qDebug() << "使用的线性偏差 (Linear Deflection):" << linearDeflection;
+
+    // 3. 创建原始模型的深拷贝，避免修改 m_currentShape 本身
+    //    BRepMesh_IncrementalMesh 会修改 Shape 内部的三角剖分数据
+    BRepBuilderAPI_Copy copier(m_currentShape);
+    TopoDS_Shape shapeToMesh = copier.Shape();
+
+    if (shapeToMesh.IsNull()) {
+        QString errorMsg = QString("创建模型副本失败！");
+        QMessageBox::critical(this, tr("网格划分错误"), errorMsg);
+        qDebug() << errorMsg;
+        return;
+    }
+
+    qDebug() << "原始模型副本创建成功。";
+
+    // 4. 对副本执行网格划分
+    try {
+        // BRepMesh_IncrementalMesh 构造函数会直接修改传入的 shapeToMesh
+        BRepMesh_IncrementalMesh mesher(shapeToMesh, linearDeflection, Standard_False, 0.5);
+
+        // 执行网格划分
+        mesher.Perform();
+
+        // 检查是否成功
+        if (!mesher.IsDone()) {
+            QString errorMsg = QString("网格划分失败！OpenCASCADE Mesher 返回 IsDone() 为 false。");
+            QMessageBox::critical(this, tr("网格划分错误"), errorMsg);
+            qDebug() << errorMsg;
+            return;
+        }
+
+        qDebug() << "网格划分成功完成。";
+
+        // 5. --- 核心改动：将划分后的模型存储到新成员变量 ---
+        m_meshedShape = shapeToMesh;
+        qDebug() << "划分后的模型已存储到 m_meshedShape。";
+
+        // 6. 显示划分后的模型
+        DisplayMeshedShape(m_meshedShape);
+
+        QMessageBox::information(this, tr("网格划分"), tr("网格划分完成，新模型已存储并显示！"));
+        qDebug() << "=== 网格划分并存储流程结束 ===";
+
+    } catch (const std::exception& e) {
+        QString errorMsg = QString("网格划分过程中发生异常: %1").arg(e.what());
+        QMessageBox::critical(this, tr("网格划分错误"), errorMsg);
+        qDebug() << errorMsg;
+        // 发生错误时，清空存储的划分后模型
+        m_meshedShape = TopoDS_Shape();
+    } catch (...) {
+        QString errorMsg = QString("网格划分过程中发生未知异常。");
+        QMessageBox::critical(this, tr("网格划分错误"), errorMsg);
+        qDebug() << errorMsg;
+        // 发生错误时，清空存储的划分后模型
+        m_meshedShape = TopoDS_Shape();
+    }
+}
+
+
+//----------过程可视化----------
+void MainWindow::init_model(){
+    if (!m_currentShape.IsNull()) {
+        DisplayShape(m_currentShape);
+    } else {
+        QMessageBox::warning(this, "错误", "没有可用模型！");
+    }
+}
+void MainWindow::mesh_model(){
+    if (!m_meshedShape.IsNull()) {
+        DisplayMeshedShape(m_meshedShape);
+    } else {
+        QMessageBox::warning(this, "错误", "没有可用模型！");
+    }
+}
+void MainWindow::surface_model(){
+    if (!m_extractedOuterSurface.IsNull()) {
+        DisplayShape(m_extractedOuterSurface);
+    } else {
+        QMessageBox::warning(this, "错误", "没有可用模型！");
+    }
+}
+void MainWindow::centerline_model(){
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

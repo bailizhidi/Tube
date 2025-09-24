@@ -12,7 +12,6 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListView>
@@ -23,7 +22,6 @@
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
-#include <QtWidgets/QTableWidget>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -127,8 +125,14 @@ public:
     QPushButton *pushButton_Inp;
     QWidget *tab_14;
     QWidget *widget;
-    QTableWidget *tableWidget;
     QMdiArea *mdiArea;
+    QTabWidget *tabWidget_6;
+    QWidget *tab_9;
+    QPushButton *pushButton_initmodel;
+    QPushButton *pushButton_meshmodel;
+    QPushButton *pushButton_surfacemodel;
+    QPushButton *pushButton_centerlinemodel;
+    QWidget *tab_15;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -670,13 +674,6 @@ public:
 
         gridLayout->addWidget(tabWidget, 0, 0, 2, 1);
 
-        tableWidget = new QTableWidget(centralwidget);
-        tableWidget->setObjectName(QString::fromUtf8("tableWidget"));
-        tableWidget->setMaximumSize(QSize(16777215, 100));
-        tableWidget->setFrameShape(QFrame::NoFrame);
-
-        gridLayout->addWidget(tableWidget, 0, 1, 1, 1);
-
         mdiArea = new QMdiArea(centralwidget);
         mdiArea->setObjectName(QString::fromUtf8("mdiArea"));
         mdiArea->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);"));
@@ -685,6 +682,45 @@ public:
         mdiArea->setBackground(brush);
 
         gridLayout->addWidget(mdiArea, 1, 1, 1, 1);
+
+        tabWidget_6 = new QTabWidget(centralwidget);
+        tabWidget_6->setObjectName(QString::fromUtf8("tabWidget_6"));
+        tabWidget_6->setMinimumSize(QSize(0, 100));
+        tabWidget_6->setMaximumSize(QSize(16777215, 100));
+        tabWidget_6->setStyleSheet(QString::fromUtf8("QTabBar::tab {\n"
+"	background-color: rgb(94, 92, 100);\n"
+"	color: rgb(0, 0, 0);\n"
+"}\n"
+"QTabBar::tab:selected {\n"
+"	background-color: rgb(222, 221, 218);\n"
+"    color: #303030; \n"
+"}\n"
+"QTabWidget::pane { border: 0; }\n"
+""));
+        tab_9 = new QWidget();
+        tab_9->setObjectName(QString::fromUtf8("tab_9"));
+        pushButton_initmodel = new QPushButton(tab_9);
+        pushButton_initmodel->setObjectName(QString::fromUtf8("pushButton_initmodel"));
+        pushButton_initmodel->setGeometry(QRect(0, 10, 88, 26));
+        pushButton_initmodel->setStyleSheet(QString::fromUtf8("color: rgb(255, 255, 255);"));
+        pushButton_meshmodel = new QPushButton(tab_9);
+        pushButton_meshmodel->setObjectName(QString::fromUtf8("pushButton_meshmodel"));
+        pushButton_meshmodel->setGeometry(QRect(0, 40, 88, 26));
+        pushButton_meshmodel->setStyleSheet(QString::fromUtf8("color: rgb(255, 255, 255);"));
+        pushButton_surfacemodel = new QPushButton(tab_9);
+        pushButton_surfacemodel->setObjectName(QString::fromUtf8("pushButton_surfacemodel"));
+        pushButton_surfacemodel->setGeometry(QRect(100, 10, 88, 26));
+        pushButton_surfacemodel->setStyleSheet(QString::fromUtf8("color: rgb(255, 255, 255);"));
+        pushButton_centerlinemodel = new QPushButton(tab_9);
+        pushButton_centerlinemodel->setObjectName(QString::fromUtf8("pushButton_centerlinemodel"));
+        pushButton_centerlinemodel->setGeometry(QRect(100, 40, 88, 26));
+        pushButton_centerlinemodel->setStyleSheet(QString::fromUtf8("color: rgb(255, 255, 255);"));
+        tabWidget_6->addTab(tab_9, QString());
+        tab_15 = new QWidget();
+        tab_15->setObjectName(QString::fromUtf8("tab_15"));
+        tabWidget_6->addTab(tab_15, QString());
+
+        gridLayout->addWidget(tabWidget_6, 0, 1, 1, 1);
 
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
@@ -702,6 +738,7 @@ public:
         tabWidget_4->setCurrentIndex(0);
         tabWidget_3->setCurrentIndex(1);
         tabWidget_5->setCurrentIndex(3);
+        tabWidget_6->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -719,7 +756,7 @@ public:
         label_14->setText(QCoreApplication::translate("MainWindow", "\344\272\247\345\223\201\345\207\240\344\275\225\345\275\242\347\212\266", nullptr));
         label_15->setText(QCoreApplication::translate("MainWindow", "\345\267\245\345\205\267\350\241\250\351\235\242\344\270\216\351\231\204\345\212\240\345\207\240\344\275\225\345\275\242\347\212\266", nullptr));
         label_16->setText(QCoreApplication::translate("MainWindow", "\346\233\262\347\272\277\346\210\226\347\202\271", nullptr));
-        pushButton_extractFace->setText(QCoreApplication::translate("MainWindow", "\346\217\220\345\217\226\345\244\226\350\241\250\351\235\242", nullptr));
+        pushButton_extractFace->setText(QCoreApplication::translate("MainWindow", "\344\277\235\345\255\230\345\244\226\350\241\250\351\235\242", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_5), QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213\345\257\274\345\205\245", nullptr));
         pushButton_AddMaterial->setText(QCoreApplication::translate("MainWindow", "\346\267\273\345\212\240\346\235\220\346\226\231", nullptr));
         tabWidget_2->setTabText(tabWidget_2->indexOf(tab_6), QCoreApplication::translate("MainWindow", "\346\235\220\346\226\231\351\200\211\346\213\251", nullptr));
@@ -789,6 +826,12 @@ public:
         tabWidget_5->setTabText(tabWidget_5->indexOf(tab_14), QCoreApplication::translate("MainWindow", "\350\256\241\347\256\227\345\274\200\345\247\213", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QCoreApplication::translate("MainWindow", "\346\217\220\344\272\244\350\256\241\347\256\227", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(widget), QCoreApplication::translate("MainWindow", "\347\273\223\346\236\234\345\210\206\346\236\220", nullptr));
+        pushButton_initmodel->setText(QCoreApplication::translate("MainWindow", "\345\216\237\345\247\213\346\250\241\345\236\213", nullptr));
+        pushButton_meshmodel->setText(QCoreApplication::translate("MainWindow", "\347\275\221\346\240\274\346\250\241\345\236\213", nullptr));
+        pushButton_surfacemodel->setText(QCoreApplication::translate("MainWindow", "\350\241\250\351\235\242\346\250\241\345\236\213", nullptr));
+        pushButton_centerlinemodel->setText(QCoreApplication::translate("MainWindow", "\344\270\255\347\272\277\346\250\241\345\236\213", nullptr));
+        tabWidget_6->setTabText(tabWidget_6->indexOf(tab_9), QCoreApplication::translate("MainWindow", "\350\277\207\347\250\213\345\217\257\350\247\206\345\214\226", nullptr));
+        tabWidget_6->setTabText(tabWidget_6->indexOf(tab_15), QCoreApplication::translate("MainWindow", "\347\273\223\346\236\234\345\217\257\350\247\206\345\214\226", nullptr));
     } // retranslateUi
 
 };
