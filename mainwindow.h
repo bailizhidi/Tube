@@ -33,8 +33,6 @@
 #include <STEPControl_Writer.hxx>
 #include <Interface_Static.hxx>
 
-#include <queue>
-#include <set>
 #include <map>
 #include <vtkCellPicker.h>
 #include <vtkRenderWindowInteractor.h>
@@ -52,6 +50,17 @@
 #include <vtkActor.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkDataSetMapper.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkProperty.h>
+#include <vtkScalarBarActor.h>
+#include <vtkLookupTable.h>
+#include <vtkDataArray.h>
+#include <vtkPointData.h>
+#include <vtkUnstructuredGrid.h>
 
 #include <functional>
 
@@ -113,7 +122,6 @@ private:
     // 在MDI子窗口中显示模型的函数
     void ShowModelInMdiArea(vtkSmartPointer<vtkRenderer> renderer);
 
-
     // 读取STEP文件
     TopoDS_Shape ReadSTEPFile(const QString& fileName);
     // 读取IGES文件
@@ -125,10 +133,6 @@ private:
     // 用OCC提取表面
     // 存储 OCC Face 和 VTK CellId 的映射
     std::map<vtkIdType, TopoDS_Face> m_faceMap;
-    // 鼠标点击回调
-    //static void OnLeftButtonDown(vtkObject* obj, unsigned long eid, void* clientdata, void* calldata);
-    // 核心函数：扩展查找外表面
-    //TopoDS_Shape FindConnectedOuterSurface(const TopoDS_Shape& shape, const TopoDS_Face& seedFace);
     // 辅助函数
     void GetFacesSharingEdge(const TopoDS_Shape& shape, const TopoDS_Edge& edge, TopTools_ListOfShape& faceList);
     bool AreFacesOnSameSide(const TopoDS_Face& f1, const TopoDS_Face& f2);
@@ -153,5 +157,23 @@ private:
     Handle(AIS_InteractiveContext) m_context;
     AIS_ShapeMap m_aisShapeMap;
     TopoDS_Shape m_extractedCenterline;   // 保存中心线结果
+
+    //读取结果文件
+    void onTabInitClicked(int index);
+    //结果可视化
+    vtkSmartPointer<vtkRenderer> renderer;
+    vtkSmartPointer<vtkUnstructuredGridReader> reader;
+    vtkSmartPointer<vtkScalarBarActor> scalarBar;
+    QList<vtkActor*> vtkActors;
+    QList<vtkUnstructuredGrid*> vtkGrids;
+    int currentFrame;
+    QString currentType; // 用于存储当前选择的标量类型
+    //void UpdateDisplayFrame(int frame); // 假设这是你更新显示的函数
+    void VisualVTKGroupFile(const QStringList& fileNames, const QString& scalarType);
+    QStringList vtkFilePaths;
+    void onButtonSClicked();
+    void onButtonSMisesClicked();
+    void onButtonSPrincipalClicked();
+    void onButtonUClicked();
 };
 #endif // MAINWINDOW_H

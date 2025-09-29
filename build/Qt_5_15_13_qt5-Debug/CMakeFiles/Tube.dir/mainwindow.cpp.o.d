@@ -891,9 +891,6 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/opencascade/NCollection_DefineSequence.hxx \
  /usr/include/opencascade/TColStd_HSequenceOfHAsciiString.hxx \
  /usr/include/opencascade/TColStd_SequenceOfHAsciiString.hxx \
- /usr/include/c++/13/queue /usr/include/c++/13/bits/stl_queue.h \
- /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
- /usr/include/c++/13/bits/stl_multiset.h \
  /usr/include/vtk-9.1/vtkCellPicker.h /usr/include/vtk-9.1/vtkPicker.h \
  /usr/include/vtk-9.1/vtkAbstractPropPicker.h \
  /usr/include/vtk-9.1/vtkAbstractPicker.h \
@@ -986,6 +983,26 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/vtk-9.1/vtkAbstractMapper3D.h \
  /usr/include/vtk-9.1/vtkAbstractMapper.h /usr/include/vtk-9.1/vtkActor.h \
  /usr/include/vtk-9.1/vtkProperty.h \
+ /usr/include/vtk-9.1/vtkSmartPointer.h \
+ /usr/include/vtk-9.1/vtkUnstructuredGridReader.h \
+ /usr/include/vtk-9.1/vtkDataReader.h \
+ /usr/include/vtk-9.1/vtkIOLegacyModule.h \
+ /usr/include/vtk-9.1/vtkSimpleReader.h \
+ /usr/include/vtk-9.1/vtkReaderAlgorithm.h \
+ /usr/include/vtk-9.1/vtkDataSetMapper.h \
+ /usr/include/vtk-9.1/vtkRenderWindow.h /usr/include/vtk-9.1/vtkWindow.h \
+ /usr/include/vtk-9.1/vtkScalarBarActor.h \
+ /usr/include/vtk-9.1/vtkActor2D.h /usr/include/vtk-9.1/vtkCoordinate.h \
+ /usr/include/vtk-9.1/vtkDoubleArray.h \
+ /usr/include/vtk-9.1/vtkRenderingAnnotationModule.h \
+ /usr/include/vtk-9.1/vtkLookupTable.h \
+ /usr/include/vtk-9.1/vtkScalarsToColors.h \
+ /usr/include/vtk-9.1/vtkDataArray.h /usr/include/vtk-9.1/vtkPointData.h \
+ /usr/include/vtk-9.1/vtkDataSetAttributes.h \
+ /usr/include/vtk-9.1/vtkDataSetAttributesFieldList.h \
+ /usr/include/vtk-9.1/vtkFieldData.h \
+ /usr/include/vtk-9.1/vtkUnstructuredGrid.h \
+ /usr/include/vtk-9.1/vtkUnstructuredGridBase.h \
  /home/ysy/Tube/build/Qt_5_15_13_qt5-Debug/Tube_autogen/include/./ui_mainwindow.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QVariant \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qvariant.h \
@@ -1046,6 +1063,8 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qstatusbar.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QTabWidget \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qtabwidget.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QToolButton \
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qtoolbutton.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QWidget \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qwidget.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QDebug \
@@ -1054,8 +1073,7 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qcontiguouscache.h \
  /usr/include/vtk-9.1/vtkLight.h /usr/include/vtk-9.1/vtkCamera.h \
  /usr/include/vtk-9.1/vtkRect.h /usr/include/vtk-9.1/vtkVector.h \
- /usr/include/vtk-9.1/vtkTuple.h /usr/include/vtk-9.1/vtkRenderWindow.h \
- /usr/include/vtk-9.1/vtkWindow.h \
+ /usr/include/vtk-9.1/vtkTuple.h \
  /usr/include/vtk-9.1/vtkInteractorStyleTrackballCamera.h \
  /usr/include/vtk-9.1/vtkInteractionStyleModule.h \
  /usr/include/vtk-9.1/vtkInteractorStyle.h \
@@ -1081,7 +1099,9 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/vtk-9.1/vtkOpenGLRenderWindow.h \
  /usr/include/vtk-9.1/vtkRenderWindow.h \
  /usr/include/vtk-9.1/vtkRenderingOpenGL2Module.h \
- /usr/include/vtk-9.1/vtkRenderingUIModule.h \
+ /usr/include/vtk-9.1/vtkRenderingUIModule.h /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_set.h \
+ /usr/include/c++/13/bits/stl_multiset.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QMdiSubWindow \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qmdisubwindow.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QMessageBox \
@@ -1145,7 +1165,8 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/opencascade/BRepMesh_Circle.hxx \
  /usr/include/opencascade/BRepMesh_Triangle.hxx \
  /usr/include/opencascade/BRepMesh_PairOfIndex.hxx \
- /usr/include/opencascade/BRepMesh_Edge.hxx \
+ /usr/include/opencascade/BRepMesh_Edge.hxx /usr/include/c++/13/queue \
+ /usr/include/c++/13/bits/stl_queue.h \
  /usr/include/opencascade/IMeshTools_ModelAlgo.hxx \
  /usr/include/opencascade/Standard_NumericError.hxx \
  /usr/include/opencascade/BRepTools.hxx \
@@ -1176,4 +1197,5 @@ CMakeFiles/Tube.dir/mainwindow.cpp.o: /home/ysy/Tube/mainwindow.cpp \
  /usr/include/opencascade/BRepBuilderAPI_Copy.hxx \
  /usr/include/opencascade/BRepBuilderAPI_ModifyShape.hxx \
  /usr/include/opencascade/BRepTools_Modifier.hxx \
- /usr/include/opencascade/BRepTools_Modifier.lxx
+ /usr/include/opencascade/BRepTools_Modifier.lxx \
+ /usr/include/vtk-9.1/vtkTextProperty.h

@@ -19,6 +19,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_meshmodel, &QPushButton::clicked,this, &MainWindow::mesh_model);
     connect(ui->pushButton_surfacemodel, &QPushButton::clicked,this, &MainWindow::surface_model);
     connect(ui->pushButton_centerlinemodel, &QPushButton::clicked,this, &MainWindow::centerline_model);
+
+    //结果可视化
+    // 获取QTabWidget的QTabBar对象
+    QTabBar *tabBar_init = ui->tabWidget->tabBar();
+    // 连接tabBar的tabBarClicked信号到自定义槽函数
+    connect(tabBar_init, &QTabBar::tabBarClicked, this, &MainWindow::onTabInitClicked);
+    //连接各种结果显示按钮
+    connect(ui->pushButton_S, &QPushButton::clicked,this, &MainWindow::onButtonSClicked);
+    connect(ui->pushButton_S_Mises, &QPushButton::clicked,this, &MainWindow::onButtonSMisesClicked);
+    connect(ui->pushButton_S_principal, &QPushButton::clicked,this, &MainWindow::onButtonSPrincipalClicked);
+    connect(ui->pushButton_U, &QPushButton::clicked,this, &MainWindow::onButtonUClicked);
 }
 
 MainWindow::~MainWindow()
@@ -26,8 +37,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//-----------参数化建模模块----------
-
+//-----------参数化建模模块----------|
 // 添加必要的VTK头文件
 #include <vtkLight.h>
 #include <vtkCamera.h>
@@ -74,7 +84,7 @@ MainWindow::~MainWindow()
 #pragma GCC diagnostic pop
 
 
-// 辅助函数：将OCC形状转换为VTK PolyData
+// 辅助函数,将OCC形状转换为VTK PolyData
 vtkSmartPointer<vtkPolyData> MainWindow::ConvertOCCShapeToVTKPolyData(const TopoDS_Shape& shape, double linearDeflection = 0.5) {
     // 生成三角网格
     BRepMesh_IncrementalMesh mesh(shape, linearDeflection, false, 0.1, true);
@@ -384,7 +394,6 @@ void MainWindow::MakeElbowModel(
         renderer->AddActor(arcActor);
 
         // 5. 写入参考点信息
-        //WriteReferencePointsToFile(rotary_pos_from_left, fixed_pos_from_left, arc_position, arc_radius);
 
         // 6. 设置相机并渲染
         renderer->ResetCamera();
@@ -454,8 +463,6 @@ void MainWindow::ShowModelInMdiArea(vtkSmartPointer<vtkRenderer> renderer) {
 
 //实现函数
 void MainWindow::make_elbow_model() {
-    qDebug() << "弯管模型创建...";
-
     bool ok[12];
     double tube_outer_radius        = ui->lineEdit_Rout->text().toDouble(&ok[0]);
     double tube_inner_radius         = ui->lineEdit_Rin->text().toDouble(&ok[1]);
@@ -478,8 +485,7 @@ void MainWindow::make_elbow_model() {
         );
 }
 
-//----------数模显示----------
-
+//----------数模显示----------|
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <TopoDS_Shape.hxx>
@@ -495,7 +501,7 @@ void MainWindow::make_elbow_model() {
 #include <vtkCallbackCommand.h>
 #pragma GCC diagnostic pop
 
-//读取文件
+//读取STP文件
 TopoDS_Shape MainWindow::ReadSTEPFile(const QString& fileName)
 {
     STEPControl_Reader reader;
@@ -518,6 +524,7 @@ TopoDS_Shape MainWindow::ReadSTEPFile(const QString& fileName)
     return shape;
 }
 
+//读取IGS文件
 TopoDS_Shape MainWindow::ReadIGESFile(const QString& fileName)
 {
     IGESControl_Reader reader;
@@ -529,7 +536,7 @@ TopoDS_Shape MainWindow::ReadIGESFile(const QString& fileName)
         return TopoDS_Shape();
     }
 
-    // 设置精度模式（可选）
+    // 设置精度模式
     Interface_Static::SetCVal("read.precision.mode", "1"); // 启用精度设置
     Interface_Static::SetRVal("read.precision.val", 1.0e-6);
 
@@ -585,11 +592,7 @@ void MainWindow::DisplayShape(const TopoDS_Shape& shape)
         vtkWidget->setRenderWindow(renderWindow);
         renderWindow->AddRenderer(renderer);
 
-        // ================== 转换 OCC Shape 为 VTK PolyData ==================
-        // double linearDeflection = 0.05; // 精度，越小越光滑
-        // double angularDeflection = 0.5; // 角度偏差（弧度）
-
-        // BRepMesh_IncrementalMesh mesh(shape, linearDeflection, Standard_True, angularDeflection);
+        // 转换 OCC Shape 为 VTK PolyData
         BRepMesh_IncrementalMesh mesh(shape, 0.01);
         mesh.Perform();
 
@@ -601,10 +604,10 @@ void MainWindow::DisplayShape(const TopoDS_Shape& shape)
         vtkSmartPointer<vtkCellArray> triangles = vtkSmartPointer<vtkCellArray>::New();
         int pointIdOffset = 0;
 
-        // ✅ 【D.1】清空旧的映射
+        // 清空旧的映射
         m_faceMap.clear();
 
-        // ✅ 【D.2】准备建立新映射
+        // 准备建立新映射
         std::vector<TopoDS_Face> faceOrderList; // 按顺序存储所有 Face
         TopExp_Explorer tempExp(shape, TopAbs_FACE);
         for (; tempExp.More(); tempExp.Next()) {
@@ -613,7 +616,7 @@ void MainWindow::DisplayShape(const TopoDS_Shape& shape)
 
         int currentVtkCellId = 0; // VTK 中 Cell 的全局 ID
 
-        // ✅ 【D.3】修改后的循环（带映射）
+        // 修改后的循环（带映射）
         int faceIndex = 0;
         for (const auto& face : faceOrderList) {
             TopLoc_Location loc;
@@ -641,7 +644,7 @@ void MainWindow::DisplayShape(const TopoDS_Shape& shape)
                     vtkIdType ids[3] = {n1-1+pointIdOffset, n2-1+pointIdOffset, n3-1+pointIdOffset};
                     vtkIdType cellId = triangles->InsertNextCell(3, ids);
 
-                    // ✅ 【D.4】记录映射关系
+                    // 记录映射关系
                     m_faceMap[currentVtkCellId + i - 1] = face;
                 }
 
@@ -681,13 +684,13 @@ void MainWindow::DisplayShape(const TopoDS_Shape& shape)
             vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
         interactor->SetInteractorStyle(style);
 
-        // ✅ 【E】创建回调命令对象
+        // 创建回调命令对象
         vtkSmartPointer<vtkCallbackCommand> clickCallback =
             vtkSmartPointer<vtkCallbackCommand>::New();
         clickCallback->SetCallback(OnLeftButtonDown);
         clickCallback->SetClientData(this); // 传递 this 指针
 
-        // ✅ 添加观察者
+        // 添加观察者
         interactor->AddObserver(vtkCommand::LeftButtonPressEvent, clickCallback);
 
         qDebug() << "模型已成功显示。";
@@ -732,7 +735,7 @@ void MainWindow::import_part()
     }
 }
 
-//----------提取外表面----------
+//----------提取外表面----------|
 #include <vtkRendererCollection.h>
 #include <unordered_set>
 #include <BRepAdaptor_Surface.hxx>
@@ -768,20 +771,20 @@ void MainWindow::OnLeftButtonDown(vtkObject* obj, unsigned long eid, void* clien
 //BFS 算法提取相连的圆柱/环面/B样条面，组成外壳
 TopoDS_Shape MainWindow::FindConnectedOuterSurface(const TopoDS_Shape& shape, const TopoDS_Face& seedFace)
 {
-    // ✅ 1. 判断种子面是否是圆柱面、环面或 B-Spline 面
+    // 1. 判断种子面是否是圆柱面、环面或 B-Spline 面
     BRepAdaptor_Surface surf(seedFace);
     GeomAbs_SurfaceType type = surf.GetType();
 
-    // ✅ 支持三种类型：圆柱、环面、B样条（自由曲面）
+    // 支持三种类型：圆柱、环面、B样条（自由曲面）
     if (type != GeomAbs_Cylinder && type != GeomAbs_Torus && type != GeomAbs_BSplineSurface) {
         qDebug() << "【警告】点击的面不是圆柱/环面/B样条面，无法提取外壁";
         qDebug() << "         面类型代码：" << type; // 打印类型编号，便于调试
-        return TopoDS_Shape(); // 返回空
+        return TopoDS_Shape();
     }
 
     qDebug() << "【调试】种子面类型：" << type;
 
-    // ✅ 2. 初始化 BFS
+    // 2. 初始化 BFS
     BRep_Builder builder;
     TopoDS_Compound result;
     builder.MakeCompound(result);
@@ -800,7 +803,7 @@ TopoDS_Shape MainWindow::FindConnectedOuterSurface(const TopoDS_Shape& shape, co
         builder.Add(result, currentFace);
         processedCount++;
 
-        // ✅ 3. 查找相邻面
+        // 3. 查找相邻面
         TopExp_Explorer edgeExp(currentFace, TopAbs_EDGE);
         for (; edgeExp.More(); edgeExp.Next()) {
             TopoDS_Edge edge = TopoDS::Edge(edgeExp.Current());
@@ -811,7 +814,7 @@ TopoDS_Shape MainWindow::FindConnectedOuterSurface(const TopoDS_Shape& shape, co
                 TopoDS_Face adjFace = TopoDS::Face(adjFaceShape);
                 if (visited.count(adjFace) > 0) continue;
 
-                // ✅ 4. 判断相邻面是否是圆柱/环面/B样条
+                // 4. 判断相邻面是否是圆柱/环面/B样条
                 BRepAdaptor_Surface adjSurf(adjFace);
                 GeomAbs_SurfaceType adjType = adjSurf.GetType();
                 if (adjType != GeomAbs_Cylinder && adjType != GeomAbs_Torus && adjType != GeomAbs_BSplineSurface) {
@@ -827,12 +830,12 @@ TopoDS_Shape MainWindow::FindConnectedOuterSurface(const TopoDS_Shape& shape, co
     return result;
 }
 
-//判断两条边是否相同（几何上重合）
+//判断两条边是否相同，几何上重合
 bool AreEdgesSame(const TopoDS_Edge& e1, const TopoDS_Edge& e2)
 {
     if (e1.IsNull() || e2.IsNull()) return false;
 
-    // ✅ 正确声明参数变量
+    // 正确声明参数变量
     Standard_Real first1, last1;
     Handle(Geom_Curve) curve1 = BRep_Tool::Curve(e1, first1, last1);
 
@@ -848,9 +851,6 @@ bool AreEdgesSame(const TopoDS_Edge& e1, const TopoDS_Edge& e2)
     if (curve1->DynamicType() != curve2->DynamicType()) {
         return false;
     }
-
-    // 可选：进一步比较曲线几何（如类型为圆、直线等）
-    // 这里可以根据需要添加更严格的比较逻辑
 
     // 比较端点位置
     gp_Pnt p1_start = BRep_Tool::Pnt(TopExp::FirstVertex(e1, Standard_True));
@@ -875,7 +875,7 @@ void MainWindow::GetFacesSharingEdge(const TopoDS_Shape& shape, const TopoDS_Edg
         TopExp_Explorer edgeExp(face, TopAbs_EDGE);
         for (; edgeExp.More(); edgeExp.Next()) {
             TopoDS_Edge currentEdge = TopoDS::Edge(edgeExp.Current());
-            // ✅ 使用自定义函数判断边是否相同
+            // 使用自定义函数判断边是否相同
             if (AreEdgesSame(currentEdge, edge)) {
                 if (!uniqueFaces.Contains(face)) {
                     uniqueFaces.Add(face);
@@ -908,11 +908,11 @@ void MainWindow::extractFace()
         fileName += ".stp";
     }
 
-    STEPControl_Writer writer; // 或者 STEPControl_Writer
+    STEPControl_Writer writer;
     // 使用 STEPControl_Writer 更简单
     STEPControl_Writer stepWriter;
 
-    // 设置 STEP 标准（可选）
+    // 设置 STEP 标准
     Interface_Static::SetCVal("write.step.schema", "AP214");
 
     // 写入模型
@@ -927,7 +927,7 @@ void MainWindow::extractFace()
 }
 
 
-//----------提取中心线段----------
+//----------提取中心线段----------|
 #include <QFileDialog>
 #include <QMessageBox>
 #include <Prs3d_Drawer.hxx>
@@ -945,12 +945,12 @@ void MainWindow::extractFace()
 #include <STEPControl_Writer.hxx>
 #include <Interface_Static.hxx>
 #include <BRepLib.hxx>
-#include <BRep_Tool.hxx> // for BRep_Tool::Polygon3D
+#include <BRep_Tool.hxx>
 #include <BRepMesh_IncrementalMesh.hxx> // 如果需要对边进行网格化
-#include <vtkPolyLine.h> // ✅ 添加这个头文件
+#include <vtkPolyLine.h>
 
 // 显示形状（支持颜色和线宽）
-#include <vtkPolyLine.h> // 确保已包含
+#include <vtkPolyLine.h>
 
 void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape, const TopoDS_Shape& centerlineShape)
 {
@@ -981,7 +981,7 @@ void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape
 
         // 创建渲染器
         vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-        renderer->SetBackground(0.1, 0.1, 0.1); // 深灰色背景
+        renderer->SetBackground(0.1, 0.1, 0.1);
 
         // 创建渲染窗口
         vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow =
@@ -989,7 +989,7 @@ void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape
         vtkWidget->setRenderWindow(renderWindow);
         renderWindow->AddRenderer(renderer);
 
-        // ================== 1. 显示外壁模型 (半透明) ==================
+        // 1. 显示外壁模型 (半透明)
         {
             BRepMesh_IncrementalMesh mesh(outerShape, 0.01); // 网格精度
             mesh.Perform();
@@ -1048,7 +1048,7 @@ void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape
             renderer->AddActor(actor);
         }
 
-        // ================== 2. 显示中心线 (红色) ==================
+        // 2. 显示中心线 (红色)
         {
             vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
             vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
@@ -1091,7 +1091,7 @@ void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape
             renderer->AddActor(actor);
         }
 
-        // ================== 3. 渲染 ==================
+        // 3. 渲染
         renderer->ResetCamera(); // 自动调整相机视角
 
         layout->addWidget(vtkWidget);
@@ -1113,10 +1113,10 @@ void MainWindow::DisplayOuterSurfaceAndCenterline(const TopoDS_Shape& outerShape
 }
 
 // 提取中心线
-#include <BRepLib.hxx> // ✅ 确保包含这个头文件
+#include <BRepLib.hxx> // 确保包含这个头文件
 #include <Geom_Line.hxx> // 如果使用替代方案
-#include <Geom_Circle.hxx> // <-- 用于处理圆弧
-#include <GeomAdaptor_Curve.hxx> // <-- 用于适配曲线
+#include <Geom_Circle.hxx> //用于处理圆弧
+#include <GeomAdaptor_Curve.hxx> // 用于适配曲线
 
 TopoDS_Shape MainWindow::ExtractAnalyticalCenterlines(const TopoDS_Shape& shape)
 {
@@ -1181,7 +1181,7 @@ TopoDS_Shape MainWindow::ExtractAnalyticalCenterlines(const TopoDS_Shape& shape)
                 // 在环面处理部分
                 TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(centerCircle);
                 if (!edge.IsNull()) {
-                    // ✅ 添加几何验证
+                    // 添加几何验证
                     BRepLib::BuildCurves3d(edge);
                     Standard_Real first, last;
                     Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, first, last);
@@ -1203,7 +1203,7 @@ TopoDS_Shape MainWindow::ExtractAnalyticalCenterlines(const TopoDS_Shape& shape)
     return comp;
 }
 
-// 按钮点击槽函数
+// 中心线实现按钮
 void MainWindow::onExtractCenterlineButtonClicked()
 {
     qDebug() << "=== 开始提取中心线 ===";
@@ -1230,18 +1230,19 @@ void MainWindow::onExtractCenterlineButtonClicked()
     m_extractedCenterline = centerlines;
 
     qDebug() << "显示外壁模型(透明)和中心线(红色)";
-    // ✅ 调用新的显示函数，传入外壁和中心线
+    // 调用新的显示函数，传入外壁和中心线
     DisplayOuterSurfaceAndCenterline(m_extractedOuterSurface, centerlines);
 
     qDebug() << "=== 中心线提取及显示完成 ===";
 }
 
-//----------网格划分-----------
+//----------网格划分-----------|
 #include <BRepBuilderAPI_Copy.hxx>
+
+//网格模型显示
 void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
 {
     try {
-        qDebug() << "=== DisplayMeshedShape (透明网格) 开始 ===";
         if (meshedShape.IsNull()) {
             QMessageBox::warning(this, tr("警告"), tr("无效的几何体，无法显示！"));
             qDebug() << "DisplayMeshedShape: 传入的 meshedShape 为空。";
@@ -1270,7 +1271,7 @@ void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
 
         // --- 3. 创建渲染器和渲染窗口 ---
         vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-        renderer->SetBackground(1, 1, 1); // 白色背景
+        renderer->SetBackground(1, 1, 1);
 
         vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow =
             vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
@@ -1351,8 +1352,8 @@ void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
         vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
         actor->SetMapper(mapper);
 
-        // --- 7. 关键修改：设置透明度和网格线显示 ---
-        // 设置面颜色 (可选，透明时可能看不清)
+        // --- 7. 设置透明度和网格线显示 ---
+        // 设置面颜色
         actor->GetProperty()->SetColor(0.8, 0.8, 0.8); // 灰色
         // 设置不透明度 (0.0 完全透明, 1.0 完全不透明)
         actor->GetProperty()->SetOpacity(0.3); // 例如，30% 不透明度
@@ -1363,7 +1364,7 @@ void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
         // 设置表面表示为表面 (SURFACE) 或线框 (WIREFRAME)
         // WIREFRAME 只显示网格线，SURFACE 显示面和线
         // 如果只想显示线，用 WIREFRAME；如果想显示透明面+线，用 SURFACE
-        actor->GetProperty()->SetRepresentationToSurface(); // 或 SetRepresentationToWireframe();
+        actor->GetProperty()->SetRepresentationToSurface();
 
         // --- 8. 添加 Actor 到渲染器并重置相机 ---
         renderer->AddActor(actor);
@@ -1385,12 +1386,7 @@ void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
             qWarning() << "DisplayMeshedShape: 获取 VTK 渲染窗口交互器失败。";
         }
 
-        // --- 12. 缓存生成的 PolyData ---
-        //m_cachedMesh = polyData;
-
         qDebug() << "DisplayMeshedShape: 透明网格模型显示成功。";
-        qDebug() << "=== DisplayMeshedShape (透明网格) 结束 ===";
-
     } catch (const std::exception& e) {
         QString errorMsg = QString("DisplayMeshedShape: 显示透明网格模型失败: %1").arg(e.what());
         QMessageBox::critical(this, tr("错误"), errorMsg);
@@ -1402,11 +1398,9 @@ void MainWindow::DisplayMeshedShape(const TopoDS_Shape& meshedShape)
     }
 }
 
-
+//网格划分功能
 void MainWindow::on_meshButton_clicked()
 {
-    qDebug() << "=== 开始执行网格划分并存储新模型 ===";
-
     // 1. 检查是否有原始模型加载
     if (m_currentShape.IsNull()) {
         QMessageBox::warning(this, tr("网格划分"), tr("请先加载一个模型！"));
@@ -1423,10 +1417,8 @@ void MainWindow::on_meshButton_clicked()
         return;
     }
 
-    qDebug() << "使用的线性偏差 (Linear Deflection):" << linearDeflection;
-
     // 3. 创建原始模型的深拷贝，避免修改 m_currentShape 本身
-    //    BRepMesh_IncrementalMesh 会修改 Shape 内部的三角剖分数据
+    // BRepMesh_IncrementalMesh 会修改 Shape 内部的三角剖分数据
     BRepBuilderAPI_Copy copier(m_currentShape);
     TopoDS_Shape shapeToMesh = copier.Shape();
 
@@ -1436,8 +1428,6 @@ void MainWindow::on_meshButton_clicked()
         qDebug() << errorMsg;
         return;
     }
-
-    qDebug() << "原始模型副本创建成功。";
 
     // 4. 对副本执行网格划分
     try {
@@ -1455,18 +1445,13 @@ void MainWindow::on_meshButton_clicked()
             return;
         }
 
-        qDebug() << "网格划分成功完成。";
-
-        // 5. --- 核心改动：将划分后的模型存储到新成员变量 ---
+        // 5. 将划分后的模型存储到新成员变量 ---
         m_meshedShape = shapeToMesh;
         qDebug() << "划分后的模型已存储到 m_meshedShape。";
 
         // 6. 显示划分后的模型
         DisplayMeshedShape(m_meshedShape);
-
         QMessageBox::information(this, tr("网格划分"), tr("网格划分完成，新模型已存储并显示！"));
-        qDebug() << "=== 网格划分并存储流程结束 ===";
-
     } catch (const std::exception& e) {
         QString errorMsg = QString("网格划分过程中发生异常: %1").arg(e.what());
         QMessageBox::critical(this, tr("网格划分错误"), errorMsg);
@@ -1483,7 +1468,8 @@ void MainWindow::on_meshButton_clicked()
 }
 
 
-//----------过程可视化----------
+//----------过程可视化----------|
+//原始模型
 void MainWindow::init_model(){
     if (!m_currentShape.IsNull()) {
         DisplayShape(m_currentShape);
@@ -1491,6 +1477,7 @@ void MainWindow::init_model(){
         QMessageBox::warning(this, "错误", "没有可用模型！");
     }
 }
+//网格模型
 void MainWindow::mesh_model(){
     if (!m_meshedShape.IsNull()) {
         DisplayMeshedShape(m_meshedShape);
@@ -1498,6 +1485,7 @@ void MainWindow::mesh_model(){
         QMessageBox::warning(this, "错误", "没有可用模型！");
     }
 }
+//表面模型
 void MainWindow::surface_model(){
     if (!m_extractedOuterSurface.IsNull()) {
         DisplayShape(m_extractedOuterSurface);
@@ -1505,9 +1493,270 @@ void MainWindow::surface_model(){
         QMessageBox::warning(this, "错误", "没有可用模型！");
     }
 }
+//中线模型
 void MainWindow::centerline_model(){
 
 }
+
+
+//----------结果可视化----------|
+#include <vtkTextProperty.h>
+
+//tab栏读取VTK文件
+void MainWindow::onTabInitClicked(int index)
+{
+    // 获取被点击的tab的文本
+    QString tabText = ui->tabWidget->tabText(index);
+
+    // 根据点击的tab索引执行不同的逻辑
+    switch (index) {
+    case 0:
+        qDebug() << "第一个标签页被点击了! 索引:" << index << ", 文本:" << tabText;
+        // 在这里添加第一个tab的点击处理逻辑
+        break;
+    case 1:
+        qDebug() << "第二个标签页被点击了! 索引:" << index << ", 文本:" << tabText;
+        // 在这里添加第二个tab的点击处理逻辑
+        break;
+    case 2:
+        qDebug() << "第三个标签页被点击了! 索引:" << index << ", 文本:" << tabText;
+        // 在这里添加第三个tab的点击处理逻辑
+        break;
+    case 3:
+        qDebug() << "第四个标签页被点击了! 索引:" << index << ", 文本:" << tabText;
+        {
+            // 1. 获取当前工作目录
+            QString currentDir = QDir::currentPath();
+            // 2. 构建results文件夹路径
+            QString resultsDirPath = currentDir + "/results";
+            QDir resultsDir(resultsDirPath);
+
+            // 3. 检查results文件夹是否存在
+            if (!resultsDir.exists()) {
+                qWarning() << "Results directory does not exist: " << resultsDirPath;
+                return;
+            }
+
+            // 4. 获取results文件夹下所有以.vtk结尾的文件
+            QStringList nameFilters;
+            nameFilters << "*.vtk";
+            QFileInfoList fileInfoList = resultsDir.entryInfoList(nameFilters, QDir::Files | QDir::NoDotAndDotDot, QDir::Name); // 按名称排序
+
+            // 5. 提取文件路径到QStringList
+            for (const QFileInfo& fileInfo : fileInfoList) {
+                vtkFilePaths.append(fileInfo.absoluteFilePath());
+            }
+            qDebug() << "Found " << vtkFilePaths.size() << " VTK files in " << resultsDirPath;
+        }
+        break;
+    default:
+        qDebug() << "未知的标签页被点击! 索引:" << index;
+        break;
+    }
+}
+
+void MainWindow::VisualVTKGroupFile(const QStringList& fileNames, const QString& scalarType)
+{
+    // --- 1. 清空并准备 MDI 子窗口 ---
+    QLayout* layout_vtk = ui->mdiArea->layout();
+    if (layout_vtk) {
+        QLayoutItem* item;
+        while ((item = layout_vtk->takeAt(0)) != nullptr) {
+            if (item->widget()) {
+                item->widget()->setParent(nullptr);
+                delete item->widget();
+            }
+            delete item;
+        }
+    } else {
+        layout_vtk = new QVBoxLayout(ui->mdiArea);
+        ui->mdiArea->setLayout(layout_vtk);
+    }
+
+    // 检查是否有文件需要处理
+    if (fileNames.isEmpty()) {
+        qDebug() << "No files provided to VisualVTKGroupFile.";
+        return; // 如果没有文件，直接返回
+    }
+
+    // 创建一个中心部件用于容纳 QVTKOpenGLNativeWidget
+    QWidget *centralWidget = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    // 创建 QVTKOpenGLNativeWidget
+    QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget(centralWidget);
+
+    // 创建 VTK 渲染窗口和渲染器
+    // 每次调用函数时都创建新的RenderWindow和Renderer
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow> localRenderWindow =
+        vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+    vtkSmartPointer<vtkRenderer> localRenderer = vtkSmartPointer<vtkRenderer>::New();
+    localRenderer->SetBackground(1.0, 1.0, 1.0);
+    localRenderWindow->AddRenderer(localRenderer);
+
+    // 设置 VTK 部件的渲染窗口
+    vtkWidget->setRenderWindow(localRenderWindow);
+
+    // 将 VTK 部件添加到布局
+    layout->addWidget(vtkWidget);
+
+    // 创建全屏子窗口
+    QMdiSubWindow *subWindow = new QMdiSubWindow(ui->mdiArea);
+    subWindow->setWidget(centralWidget); // 设置包含VTK部件的中心部件
+    subWindow->setWindowFlags(Qt::FramelessWindowHint); // 无边框
+    subWindow->setAttribute(Qt::WA_DeleteOnClose);
+
+    // 将子窗口添加到 MDI 区域
+    ui->mdiArea->addSubWindow(subWindow);
+
+    // --- 2. 执行 VTK 可视化逻辑 ---
+    QString currentTypeForThisWindow = scalarType;
+    int currentFrame = 0;
+    QList<vtkActor*> vtkActorsForThisWindow;
+    QList<vtkUnstructuredGrid*> vtkGridsForThisWindow;
+    vtkSmartPointer<vtkUnstructuredGridReader> reader;
+
+    // 在循环外创建scalarBar，但只在需要时
+    vtkSmartPointer<vtkScalarBarActor> scalarBar = nullptr; // 初始化为nullptr
+    vtkSmartPointer<vtkLookupTable> lut = nullptr; // 也推迟LUT的创建
+
+    for (const auto& fileName : fileNames) {
+        reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+        reader->SetFileName(fileName.toStdString().c_str());
+        reader->Update();
+
+        vtkSmartPointer<vtkDataArray> selectedScalar;
+        QString color_name = "Solid";
+        bool useScalar = true;
+
+        std::string typeStr = currentTypeForThisWindow.toStdString();
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray(typeStr.c_str());
+        color_name = currentTypeForThisWindow.toStdString().c_str();
+
+        if (!selectedScalar) {
+            qWarning() << "标量数组 " << currentTypeForThisWindow << " 不存在 in file " << fileName << "!";
+            continue; // 跳过当前文件，继续处理下一个
+        }
+
+        vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+        mapper->SetInputConnection(reader->GetOutputPort());
+
+        if (useScalar && selectedScalar) {
+            int numComponents = selectedScalar->GetNumberOfComponents();
+            mapper->SetScalarVisibility(true);
+            mapper->SelectColorArray(selectedScalar->GetName());
+
+            if (numComponents == 1) {
+                mapper->SetScalarModeToUsePointFieldData();
+            } else {
+                mapper->SetScalarModeToUsePointFieldData();
+            }
+
+            double range[2];
+            selectedScalar->GetRange(range);
+            if (range[0] >= range[1]) {
+                range[0] = 0;
+                range[1] = 1;
+            }
+            mapper->SetScalarRange(range[0], range[1]);
+
+            // --- 在这里创建LUT和scalarBar（如果还没有） ---
+            if (!lut) { // 只在第一次找到有效的scalar时创建LUT
+                lut = vtkSmartPointer<vtkLookupTable>::New();
+                lut->SetHueRange(0.666667, 0.0); // Blue to Red
+                lut->Build();
+                mapper->SetLookupTable(lut);
+            } else { // 如果LUT已存在，也应用到这个mapper
+                mapper->SetLookupTable(lut);
+            }
+
+            // 在这里创建scalarBar
+            if (!scalarBar) { // 只在第一次找到有效的scalar时创建scalarBar
+                scalarBar = vtkSmartPointer<vtkScalarBarActor>::New();
+                scalarBar->SetLookupTable(lut); // 使用刚创建或已存在的LUT
+                scalarBar->SetTitle(color_name.toStdString().c_str());
+                scalarBar->SetNumberOfLabels(10);
+                scalarBar->SetDragable(true);
+
+                // --- 设置标量条文字颜色和固定字体大小 ---
+                scalarBar->GetLabelTextProperty()->SetColor(0.0, 0.0, 0.0); // 黑色
+                scalarBar->GetLabelTextProperty()->SetFontSize(18); // 固定字体大小
+                scalarBar->GetTitleTextProperty()->SetColor(0.0, 0.0, 0.0); // 黑色
+                scalarBar->GetTitleTextProperty()->SetFontSize(20); // 固定字体大小
+
+                // 保持颜色条大小固定 (相对窗口大小的比例)
+                scalarBar->SetWidth(0.1);
+                scalarBar->SetHeight(0.8);
+
+                // 只添加一次scalarBar到renderer
+                localRenderer->AddActor2D(scalarBar);
+            }
+
+        } else {
+            mapper->SetScalarVisibility(false);
+        }
+
+        vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+        actor->SetMapper(mapper);
+        actor->GetProperty()->EdgeVisibilityOn();
+        actor->GetProperty()->SetAmbient(0.25);
+        if (!useScalar) {
+            actor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+        }
+
+        vtkGridsForThisWindow.push_back(reader->GetOutput());
+        vtkActorsForThisWindow.push_back(actor);
+        localRenderer->AddActor(actor);
+    }
+
+    // 检查是否成功添加了任何带有标量的Actor（即是否创建了LUT和scalarBar）
+    if (!lut) {
+        qDebug() << "警告: 没有找到有效的标量数组用于任何输入文件，scalarBar 未创建。";
+    }
+
+    currentFrame = 0;
+
+    // --- 3. 设置交互器 ---
+    vtkSmartPointer<vtkRenderWindowInteractor> interactor = localRenderWindow->GetInteractor();
+    vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+    interactor->SetInteractorStyle(style);
+
+    // --- 4. 强制刷新布局和渲染 ---
+    localRenderWindow->Render();
+
+    // --- 5. 重置相机以适应模型 ---
+    localRenderer->ResetCamera();
+
+    // --- 6. 再次渲染以应用相机调整 ---
+    localRenderWindow->Render();
+
+    // 显示子窗口并最大化
+    subWindow->showMaximized();
+}
+
+//显示S
+void MainWindow::onButtonSClicked()
+{
+    // vtkFilePaths是之前获取的VTK文件路径列表
+    VisualVTKGroupFile(vtkFilePaths, "S");
+}
+//显示S_Mises
+void MainWindow::onButtonSMisesClicked()
+{
+    VisualVTKGroupFile(vtkFilePaths, "S_Mises");
+}
+//显示S_Principal
+void MainWindow::onButtonSPrincipalClicked()
+{
+    VisualVTKGroupFile(vtkFilePaths, "S_Principal");
+}
+//显示U
+void MainWindow::onButtonUClicked()
+{
+    VisualVTKGroupFile(vtkFilePaths, "U");
+}
+
 
 
 
